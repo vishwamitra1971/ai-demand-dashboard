@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Demand Dashboard — Scenario Framework</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- ─────────────────────────────────────────────────────────────────
+       PASSWORD GATE
+       Default password: NRGdash2026
+       To change it, run this in any browser console and paste the output
+       into PASSWORD_HASH below:
+         crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourPassword'))
+           .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
+  ──────────────────────────────────────────────────────────────────── -->
+  <script>
+    const PASSWORD_HASH = '54bf334588be167ae0fd0008165b3776752ac2e224d9a8fed634e26b28a1c548';
+
+    async function checkPassword() {
+      const input = document.getElementById('pw-input').value;
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+      const hash = [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+      if (hash === PASSWORD_HASH) {
+        sessionStorage.setItem('ai_dash_auth', hash);
+        document.getElementById('pw-gate').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+      } else {
+        const err = document.getElementById('pw-error');
+        err.style.opacity = '1';
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-input').focus();
+        setTimeout(() => err.style.opacity = '0', 2500);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (sessionStorage.getItem('ai_dash_auth') === PASSWORD_HASH) {
+        document.getElementById('pw-gate').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+      }
+      document.getElementById('pw-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') checkPassword();
+      });
+    });
+  </script>
+
+  <style>
+    /* ── Password gate ── */
+    #pw-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0a0e14;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pw-box {
+      width: 360px; padding: 40px 36px;
+      background: #111720; border: 1px solid #2a3447; border-radius: 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .pw-logo {
+      width: 44px; height: 44px; border-radius: 11px;
+      background: linear-gradient(135deg, #4e9eff 0%, #a875f5 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #0a0e14; letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    .pw-title { font-size: 17px; font-weight: 700; color: #d8e3f0; text-align: center; margin-bottom: 4px; }
+    .pw-sub { font-size: 12px; color: #6b7d96; text-align: center; margin-bottom: 28px; }
+    .pw-label { font-size: 11px; font-weight: 600; color: #6b7d96; letter-spacing: 0.5px; text-transform: uppercase; align-self: flex-start; margin-bottom: 6px; }
+    #pw-input {
+      width: 100%; padding: 11px 14px; border-radius: 8px;
+      background: #1a2130; border: 1px solid #2a3447; color: #d8e3f0;
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 12px;
+    }
+    #pw-input:focus { border-color: #4e9eff; }
+    #pw-btn {
+      width: 100%; padding: 11px; border-radius: 8px;
+      background: linear-gradient(135deg, #4e9eff 0%, #a875f5 100%);
+      border: none; color: #0a0e14; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    #pw-btn:hover { opacity: 0.9; }
+    #pw-error {
+      font-size: 11px; color: #f05252; margin-top: 10px;
+      opacity: 0; transition: opacity 0.3s; text-align: center;
+    }
+    #app { display: none; }
+  </style>
+
+  <style>
+    :root {
+      --bg: #0a0e14;
+      --surface: #111720;
+      --surface2: #1a2130;
+      --surface3: #222d3d;
+      --border: #2a3447;
+      --border2: #3a4a60;
+      --text: #d8e3f0;
+      --muted: #6b7d96;
+      --muted2: #4a5870;
+      --green: #3ecf6c;
+      --red: #f05252;
+      --yellow: #e8a22a;
+      --blue: #4e9eff;
+      --purple: #a875f5;
+      --orange: #f07832;
+      --teal: #2cd5cc;
+      --scA: #4e9eff;
+      --scB: #3ecf6c;
+      --scC: #f05252;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; line-height: 1.5; }
+
+    /* ═══ Header ═══ */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(10,14,20,0.96); backdrop-filter: blur(16px);
+    }
+    .h-left { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, #4e9eff 0%, #a875f5 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 900; color: #0a0e14; letter-spacing: -1px;
+    }
+    .h-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+    .h-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .h-right { display: flex; align-items: center; gap: 12px; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .h-meta { font-size: 11px; color: var(--muted); }
+
+    /* ═══ Main layout ═══ */
+    main { max-width: 1480px; margin: 0 auto; padding: 24px 32px 60px; }
+
+    /* ═══ Scenario Framework Panel ═══ */
+    .scenario-header {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .scenario-header::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    .scenario-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;
+    }
+    .sc-card {
+      border-radius: 14px; padding: 20px;
+      border: 1px solid; position: relative; overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .sc-card:hover { box-shadow: 0 6px 32px rgba(0,0,0,0.5); }
+    .sc-a { background: linear-gradient(135deg, rgba(78,158,255,0.07) 0%, rgba(78,158,255,0.03) 100%); border-color: rgba(78,158,255,0.25); }
+    .sc-b { background: linear-gradient(135deg, rgba(62,207,108,0.09) 0%, rgba(62,207,108,0.03) 100%); border-color: rgba(62,207,108,0.3); }
+    .sc-c { background: linear-gradient(135deg, rgba(240,82,82,0.07) 0%, rgba(240,82,82,0.03) 100%); border-color: rgba(240,82,82,0.25); }
+
+    .sc-badge-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .sc-label { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+    .sc-a .sc-label { color: var(--scA); }
+    .sc-b .sc-label { color: var(--scB); }
+    .sc-c .sc-label { color: var(--scC); }
+
+    .trending-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+      background: rgba(62,207,108,0.2); color: var(--green); border: 1px solid rgba(62,207,108,0.35);
+    }
+    .sc-name { font-size: 18px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 4px; }
+    .sc-thesis { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.4; }
+
+    .prob-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+    .prob-num { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; line-height: 1; }
+    .sc-a .prob-num { color: var(--scA); }
+    .sc-b .prob-num { color: var(--scB); }
+    .sc-c .prob-num { color: var(--scC); }
+    .prob-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+
+    .prob-history { display: flex; gap: 6px; align-items: center; margin-bottom: 14px; }
+    .prob-hist-item { text-align: center; }
+    .prob-hist-val { font-size: 13px; font-weight: 700; }
+    .prob-hist-date { font-size: 9px; color: var(--muted); margin-top: 1px; }
+    .prob-hist-arrow { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+
+    .sc-demand-box {
+      background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .sc-demand-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 2px; }
+    .sc-demand-val { font-size: 16px; font-weight: 800; letter-spacing: -0.4px; }
+    .sc-a .sc-demand-val { color: var(--scA); }
+    .sc-b .sc-demand-val { color: var(--scB); }
+    .sc-c .sc-demand-val { color: var(--scC); }
+    .sc-demand-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+    .trigger-count { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .trigger-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .t-fire { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+    .t-cold { background: var(--muted2); }
+    .trigger-label { color: var(--muted); font-size: 11px; }
+
+    /* ═══ Section labels ═══ */
+    .section-label {
+      font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); margin: 32px 0 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label .sec-icon {
+      width: 22px; height: 22px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+    }
+    .sec-eff .sec-icon { background: rgba(168,117,245,0.15); }
+    .sec-mkt .sec-icon { background: rgba(232,162,42,0.15); }
+    .sec-adp .sec-icon { background: rgba(62,207,108,0.12); }
+    .section-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    /* ═══ Indicator grid ═══ */
+    .ind-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px,1fr)); gap: 14px; }
+
+    /* ═══ Indicator card ═══ */
+    .ind-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .ind-card:hover { border-color: var(--border2); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
+
+    .ind-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .ind-num { font-size: 9px; font-weight: 700; color: var(--muted2); letter-spacing: 0.5px; text-transform: uppercase; }
+    .ind-title { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .sc-signal {
+      font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 12px;
+      white-space: nowrap; letter-spacing: 0.3px;
+    }
+    .sig-a { background: rgba(78,158,255,0.15); color: var(--scA); border: 1px solid rgba(78,158,255,0.3); }
+    .sig-b { background: rgba(62,207,108,0.12); color: var(--scB); border: 1px solid rgba(62,207,108,0.25); }
+    .sig-c { background: rgba(240,82,82,0.12); color: var(--scC); border: 1px solid rgba(240,82,82,0.25); }
+    .sig-mix { background: rgba(232,162,42,0.12); color: var(--yellow); border: 1px solid rgba(232,162,42,0.25); }
+    .sig-n { background: rgba(107,125,150,0.12); color: var(--muted); border: 1px solid rgba(107,125,150,0.25); }
+
+    /* Metric */
+    .metric-row { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+    .metric-val { font-size: 28px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+    .metric-unit { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .metric-delta {
+      font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 5px; margin-bottom: 2px;
+    }
+    .d-up { background: rgba(62,207,108,0.12); color: var(--green); }
+    .d-dn { background: rgba(240,82,82,0.12); color: var(--red); }
+    .d-warn { background: rgba(232,162,42,0.12); color: var(--yellow); }
+
+    /* Chart */
+    .chart-wrap { position: relative; height: 82px; }
+    .chart-wrap-md { position: relative; height: 110px; }
+
+    /* Scenario threshold gauge */
+    .thresh-panel {
+      background: var(--surface2); border-radius: 8px; padding: 10px 12px;
+      border: 1px solid var(--border);
+    }
+    .thresh-title { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .thresh-row { display: flex; gap: 4px; margin-bottom: 6px; align-items: center; }
+    .thresh-sc-label { font-size: 9px; font-weight: 700; width: 16px; flex-shrink: 0; }
+    .thresh-a-l { color: var(--scA); }
+    .thresh-b-l { color: var(--scB); }
+    .thresh-c-l { color: var(--scC); }
+    .thresh-bar-wrap { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.05); position: relative; overflow: visible; }
+    .thresh-bar-fill { height: 100%; border-radius: 3px; }
+    .thresh-val { font-size: 9px; color: var(--muted); width: 80px; text-align: right; font-weight: 500; }
+    .thresh-current-marker {
+      position: absolute; top: -3px; width: 2px; height: 12px;
+      background: var(--yellow); border-radius: 1px;
+      box-shadow: 0 0 4px var(--yellow);
+    }
+    .thresh-status {
+      font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 5px;
+      padding-top: 6px; border-top: 1px solid var(--border);
+    }
+    .thresh-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* Sub-metrics */
+    .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .sub-m { background: var(--surface2); border-radius: 7px; padding: 7px 10px; }
+    .sub-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .sub-v { font-size: 13px; font-weight: 700; margin-top: 1px; }
+    .sub-d { font-size: 9px; margin-top: 1px; color: var(--muted); }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid var(--border); }
+
+    /* Provenance */
+    .prov {
+      font-size: 10px; color: var(--muted); line-height: 1.5;
+      padding: 7px 10px; border-left: 2px solid rgba(78,158,255,0.25);
+      background: rgba(78,158,255,0.03); border-radius: 0 6px 6px 0;
+    }
+    .src-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .src-lbl { font-size: 9px; color: var(--muted); }
+    .src-link { font-size: 9px; color: var(--blue); text-decoration: none; }
+    .src-link:hover { text-decoration: underline; }
+    .src-link::after { content: '↗'; font-size: 8px; margin-left: 1px; }
+    .conf-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+    .conf-hi { background: var(--green); }
+    .conf-md { background: var(--yellow); }
+
+    /* Timeline (regulatory) */
+    .timeline { display: flex; flex-direction: column; gap: 7px; }
+    .tl-item { display: flex; gap: 9px; align-items: flex-start; }
+    .tl-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .tl-done { background: var(--green); }
+    .tl-now { background: var(--blue); box-shadow: 0 0 5px var(--blue); }
+    .tl-pend { background: var(--muted2); }
+    .tl-date { font-size: 9px; color: var(--muted); }
+    .tl-text { font-size: 11px; margin-top: 1px; }
+
+    /* NRG action panel */
+    .nrg-panel {
+      background: rgba(168,117,245,0.05); border: 1px solid rgba(168,117,245,0.2);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .nrg-label { font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: var(--purple); margin-bottom: 6px; }
+    .nrg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .nrg-col-label { font-size: 9px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .nrg-item { font-size: 10px; color: var(--text); margin-bottom: 2px; line-height: 1.4; }
+    .nrg-item::before { content: '→ '; color: var(--purple); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 14px 32px;
+      font-size: 10px; color: var(--muted);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .scenario-grid { grid-template-columns: 1fr; }
+      header, main, footer { padding-left: 16px; padding-right: 16px; }
+    }
+    @media (max-width: 600px) {
+      .ind-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-logo">AI</div>
+    <div class="pw-title">AI Demand Dashboard</div>
+    <div class="pw-sub">Scenario Framework · Q1 2026<br/>Enter your access password to continue.</div>
+    <div class="pw-label">Password</div>
+    <input id="pw-input" type="password" placeholder="Enter password" autocomplete="current-password" />
+    <button id="pw-btn" onclick="checkPassword()">Access Dashboard</button>
+    <div id="pw-error">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- Dashboard app -->
+<div id="app">
+
+<header>
+  <div class="h-left">
+    <div class="logo">AI</div>
+    <div>
+      <div class="h-title">AI Demand Dashboard</div>
+      <div class="h-sub">12 indicators · 3 scenarios · Technology Efficiency · Market Behavior · Adoption Patterns</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <div class="live-dot"></div>
+    <div class="h-meta">Q1 2026 · Updated Mar 30 2026</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══════════════════════════════════ -->
+  <!--  SCENARIO FRAMEWORK               -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="scenario-header" style="margin-top:4px;">Scenario Framework — 2030 U.S. Data Center Demand Outlook</div>
+
+  <div class="scenario-grid">
+
+    <!-- Scenario A -->
+    <div class="sc-card sc-a">
+      <div class="sc-badge-row">
+        <span class="sc-label">Scenario A</span>
+        <span style="font-size:11px; color:var(--muted);">↓ from 25% Nov'24</span>
+      </div>
+      <div class="sc-name">"Efficiency Wins"</div>
+      <div class="sc-thesis">Efficiency gains outrun adoption. Demand plateaus as hardware/software improvements exceed 40%/yr and Jevons rebound stays below 50%.</div>
+      <div class="prob-row">
+        <div class="prob-num">15%</div>
+        <div class="prob-label">Current<br>probability</div>
+      </div>
+      <div class="prob-history">
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scA)">25%</div><div class="prob-hist-date">Nov '24</div></div>
+        <div class="prob-hist-arrow">→</div>
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scA)">15%</div><div class="prob-hist-date">Dec '25</div></div>
+        <div class="prob-hist-arrow">→</div>
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scA)">15%</div><div class="prob-hist-date">Mar '26</div></div>
+      </div>
+      <div class="sc-demand-box">
+        <div class="sc-demand-label">2030 U.S. Data Center Demand</div>
+        <div class="sc-demand-val">500–600 TWh</div>
+        <div class="sc-demand-sub">~15% CAGR 2026–2030 (decelerating)</div>
+      </div>
+      <div class="trigger-count">
+        <div class="trigger-dot t-fire"></div>
+        <div class="trigger-dot t-fire"></div>
+        <div class="trigger-dot t-cold"></div>
+        <div class="trigger-dot t-cold"></div>
+        <div class="trigger-dot t-cold"></div>
+        <div class="trigger-dot t-cold"></div>
+        <span class="trigger-label">2 of 6 triggers firing (need 2+)</span>
+      </div>
+    </div>
+
+    <!-- Scenario B -->
+    <div class="sc-card sc-b" style="position:relative;">
+      <div style="position:absolute;top:12px;right:12px;"><span class="trending-badge">● Base Case</span></div>
+      <div class="sc-badge-row">
+        <span class="sc-label">Scenario B</span>
+        <span style="font-size:11px; color:var(--green); font-weight:700;">↑ from 50% Nov'24</span>
+      </div>
+      <div class="sc-name">"Balanced Growth"</div>
+      <div class="sc-thesis">Efficiency and adoption grow in parallel. Jevons rebound at 100–130%. Steady, strong demand growth through 2028 then gradual deceleration.</div>
+      <div class="prob-row">
+        <div class="prob-num">70%</div>
+        <div class="prob-label">Current<br>probability</div>
+      </div>
+      <div class="prob-history">
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scB)">50%</div><div class="prob-hist-date">Nov '24</div></div>
+        <div class="prob-hist-arrow">→</div>
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scB)">70%</div><div class="prob-hist-date">Dec '25</div></div>
+        <div class="prob-hist-arrow">→</div>
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scB)">70%</div><div class="prob-hist-date">Mar '26</div></div>
+      </div>
+      <div class="sc-demand-box">
+        <div class="sc-demand-label">2030 U.S. Data Center Demand</div>
+        <div class="sc-demand-val">750–900 TWh</div>
+        <div class="sc-demand-sub">~20% CAGR 2026–2030 · Base model: 820 TWh</div>
+      </div>
+      <div class="trigger-count">
+        <span style="font-size:10px; color:var(--muted);">Confirmation range — watch for deviation</span>
+      </div>
+    </div>
+
+    <!-- Scenario C -->
+    <div class="sc-card sc-c">
+      <div class="sc-badge-row">
+        <span class="sc-label">Scenario C</span>
+        <span style="font-size:11px; color:var(--muted);">→ stable at 15% since Dec'25</span>
+      </div>
+      <div class="sc-name">"Jevons Dominates"</div>
+      <div class="sc-thesis">Efficiency gains trigger explosive adoption. AI becomes ubiquitous. Rebound exceeds 200%. Demand exceeds all projections.</div>
+      <div class="prob-row">
+        <div class="prob-num">15%</div>
+        <div class="prob-label">Current<br>probability</div>
+      </div>
+      <div class="prob-history">
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scC)">25%</div><div class="prob-hist-date">Nov '24</div></div>
+        <div class="prob-hist-arrow">→</div>
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scC)">15%</div><div class="prob-hist-date">Dec '25</div></div>
+        <div class="prob-hist-arrow">→</div>
+        <div class="prob-hist-item"><div class="prob-hist-val" style="color:var(--scC)">15%</div><div class="prob-hist-date">Mar '26</div></div>
+      </div>
+      <div class="sc-demand-box">
+        <div class="sc-demand-label">2030 U.S. Data Center Demand</div>
+        <div class="sc-demand-val">1,100–1,500 TWh</div>
+        <div class="sc-demand-sub">~30% CAGR 2026–2030 (sustained)</div>
+      </div>
+      <div class="trigger-count">
+        <div class="trigger-dot t-fire"></div>
+        <div class="trigger-dot t-fire"></div>
+        <div class="trigger-dot t-fire"></div>
+        <div class="trigger-dot t-fire"></div>
+        <div class="trigger-dot t-cold"></div>
+        <div class="trigger-dot t-cold"></div>
+        <div class="trigger-dot t-cold"></div>
+        <span class="trigger-label">4 of 7 triggers firing (need 3+)</span>
+      </div>
+    </div>
+
+  </div><!-- /scenario-grid -->
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  CATEGORY 1: TECHNOLOGY EFFICIENCY                -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="section-label sec-eff">
+    <div class="sec-icon">⚡</div>
+    Technology Efficiency
+    <span style="font-size:10px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">GPU perf/watt · Training costs · Inference pricing · Edge AI volumes</span>
+  </div>
+
+  <div class="ind-grid">
+
+    <!-- T1: GPU Performance-per-Watt -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Technology Efficiency · T1</div>
+          <div class="ind-title">GPU Performance-per-Watt</div>
+        </div>
+        <span class="sc-signal sig-mix">B / A border</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--purple);">9.0</div>
+        <div class="metric-unit">TFLOPS/W (B200)</div>
+        <div class="metric-delta d-up">~30–40%/yr CAGR</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="perfwattChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — Efficiency Gain Rate</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
+            <div class="thresh-current-marker" style="left:60%;"></div>
+          </div>
+          <span class="thresh-val">&gt;40%/yr ← triggers A</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:75%; background: rgba(62,207,108,0.4);"></div>
+            <div class="thresh-current-marker" style="left:60%;"></div>
+          </div>
+          <span class="thresh-val">25–35%/yr (B range)</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:35%; background: rgba(240,82,82,0.3);"></div>
+          </div>
+          <span class="thresh-val">&lt;20%/yr → more C</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--yellow);"></div>
+          Current: ~30–40%/yr CAGR (A100→H100→B200) — borderline A/B. Trajectory acceleration with Rubin NVL 2026 expected to push into A territory.
+        </div>
+      </div>
+      <hr/>
+      <div class="sub-grid">
+        <div class="sub-m">
+          <div class="sub-lbl">H100 (2022)</div>
+          <div class="sub-v" style="color:var(--blue);">5.65 TFLOPS/W</div>
+          <div class="sub-d">FP8 @ 700W</div>
+        </div>
+        <div class="sub-m">
+          <div class="sub-lbl">B200 (2025)</div>
+          <div class="sub-v" style="color:var(--purple);">9.0 TFLOPS/W</div>
+          <div class="sub-d">FP8 @ 1,000W</div>
+        </div>
+      </div>
+      <div class="prov">Efficiency calculated as TFLOPS FP8 ÷ TDP (W). NVIDIA does not publish official TFLOPS/W; derived from NVIDIA product datasheets. Architectural improvements (HBM3e bandwidth, NVLink, sparsity) drive gains beyond raw transistor scaling. ±10% uncertainty on TDP under actual workloads.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-md"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://www.nvidia.com/en-us/data-center/products/blackwell-architecture/" class="src-link" target="_blank">NVIDIA Blackwell Datasheet</a>
+        <span class="src-lbl">+</span>
+        <a href="https://epoch.ai/blog/trends-in-the-dollar-training-cost-of-machine-learning-systems" class="src-link" target="_blank">Epoch AI Efficiency Trends</a>
+      </div>
+    </div>
+
+    <!-- T2: AI Training Costs -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Technology Efficiency · T2</div>
+          <div class="ind-title">AI Training Cost Benchmarks</div>
+        </div>
+        <span class="sc-signal sig-c">→ Scenario C</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--red);">$500M</div>
+        <div class="metric-unit">frontier run (Grok 4)</div>
+        <div class="metric-delta d-warn">+2.4×/year growth</div>
+      </div>
+      <div class="chart-wrap-md">
+        <canvas id="trainingChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — YoY Cost Change</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
+          </div>
+          <span class="thresh-val">Drop &gt;70%/yr × 2 yrs</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:65%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">Declining 30–40%/yr</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:25%; background: rgba(240,82,82,0.4);"></div>
+            <div class="thresh-current-marker" style="left:100%;"></div>
+          </div>
+          <span class="thresh-val">Rising / stable ← NOW</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--red);"></div>
+          Frontier costs escalating +2.4×/yr (Epoch AI). Signals Scenario C at the margin — but commodity inference (not training) is declining rapidly.
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">Epoch AI: bottom-up methodology (GPU-hrs × amortized hardware + energy). ±30–50% uncertainty on undisclosed models. Covers final training run only; R&D overhead adds ~29–49%. Source: Epoch AI (epochai.org), Stanford HAI AI Index 2025.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-md"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://epoch.ai/blog/trends-in-the-dollar-training-cost-of-machine-learning-systems" class="src-link" target="_blank">Epoch AI Training Costs</a>
+        <span class="src-lbl">+</span>
+        <a href="https://hai.stanford.edu/ai-index/2025-ai-index-report" class="src-link" target="_blank">Stanford HAI AI Index 2025</a>
+      </div>
+    </div>
+
+    <!-- T3: Inference API Pricing -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Technology Efficiency · T3</div>
+          <div class="ind-title">Inference API Pricing</div>
+        </div>
+        <span class="sc-signal sig-mix">A signal / B volume</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--green);">$0.40</div>
+        <div class="metric-unit">/M tokens (GPT-4 equiv)</div>
+        <div class="metric-delta d-dn">−280× since Nov 2022</div>
+      </div>
+      <div class="chart-wrap-md">
+        <canvas id="inferenceChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — Annual Price Decline Rate</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
+            <div class="thresh-current-marker" style="left:90%;"></div>
+          </div>
+          <span class="thresh-val">&gt;50%/yr, vol flat ← ≈NOW</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:70%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">Decline + prop. volume</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:30%; background: rgba(240,82,82,0.3);"></div>
+          </div>
+          <span class="thresh-val">Price floor stabilizes</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--yellow);"></div>
+          Price decline rate (~10×/yr) exceeds A threshold. But volume IS scaling proportionally — Jevons rebound intact → leaning B, not pure A.
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">Artificial Analysis queries live provider APIs weekly. Prices are published list rates; volume discounts not captured. Historical data from Epoch AI snapshot database and Stanford HAI AI Index. Log scale used — 10× annual decline through Dec 2025.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://artificialanalysis.ai/models" class="src-link" target="_blank">Artificial Analysis (weekly)</a>
+        <span class="src-lbl">+</span>
+        <a href="https://epoch.ai/data-insights/llm-inference-price-trends" class="src-link" target="_blank">Epoch AI Inference Trends</a>
+      </div>
+    </div>
+
+    <!-- T4: Edge AI Device Volumes -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Technology Efficiency · T4</div>
+          <div class="ind-title">Edge AI Device Volumes</div>
+        </div>
+        <span class="sc-signal sig-a">A trigger MET</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--teal);">370M</div>
+        <div class="metric-unit">GenAI smartphones 2025</div>
+        <div class="metric-delta d-up">+73% YoY</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="edgeChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario A Trigger — Annual Edge AI Device Shipments</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
+            <div class="thresh-current-marker" style="left:97%;"></div>
+          </div>
+          <span class="thresh-val">&gt;100M/yr ← 370M NOW</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--scA);"></div>
+          <strong style="color:var(--scA)">Trigger A firing.</strong> At 370M units, this threshold (>100M) is exceeded 3.7×. However, edge AI offloads centralized inference only if these devices actively replace cloud calls — still debated.
+        </div>
+      </div>
+      <hr/>
+      <div class="sub-grid">
+        <div class="sub-m">
+          <div class="sub-lbl">AI PC market share</div>
+          <div class="sub-v" style="color:var(--blue);">59%</div>
+          <div class="sub-d">of shipments by 2026</div>
+        </div>
+        <div class="sub-m">
+          <div class="sub-lbl">Edge compute spend</div>
+          <div class="sub-v">$261B</div>
+          <div class="sub-d">2025; CAGR 13.8%</div>
+        </div>
+      </div>
+      <div class="prov">IDC sell-in shipment data from OEM surveys + channel inventory tracking. GenAI smartphone = on-device AI inference capability (NPU >10 TOPS). AI Advanced PC = dedicated NPU ≥40 TOPS (Counterpoint Research). Quarterly cadence.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://my.idc.com/getdoc.jsp?containerId=prUS52478124" class="src-link" target="_blank">IDC GenAI Smartphone Tracker</a>
+        <span class="src-lbl">+</span>
+        <a href="https://counterpointresearch.com/en/reports/ai-advanced-pcs-to-surpass-half-of-global-shipments-in-2026" class="src-link" target="_blank">Counterpoint Research</a>
+      </div>
+    </div>
+
+  </div><!-- /Technology Efficiency grid -->
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  CATEGORY 2: MARKET BEHAVIOR                      -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="section-label sec-mkt">
+    <div class="sec-icon">📊</div>
+    Market Behavior
+    <span style="font-size:10px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">Hyperscaler capex · GPU lease rates · Interconnection queues · DC vacancy</span>
+  </div>
+
+  <div class="ind-grid">
+
+    <!-- M1: Hyperscaler Capex -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Market Behavior · M1</div>
+          <div class="ind-title">Hyperscaler Capex Growth</div>
+        </div>
+        <span class="sc-signal sig-c">C trigger MET</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--green);">$600B+</div>
+        <div class="metric-unit">combined 2026E</div>
+        <div class="metric-delta d-up">+36% YoY</div>
+      </div>
+      <div class="chart-wrap-md">
+        <canvas id="capexChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — YoY Capex Growth Rate</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:25%; background: rgba(78,158,255,0.4);"></div>
+          </div>
+          <span class="thresh-val">&lt;10%/yr growth</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:70%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">15–30%/yr (B range)</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.4);"></div>
+            <div class="thresh-current-marker" style="left:90%;"></div>
+          </div>
+          <span class="thresh-val">&gt;35%/yr ← 36% NOW</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--scC);"></div>
+          <strong style="color:var(--scC)">Trigger C firing.</strong> At +36% YoY, hyperscaler capex has crossed the Scenario C threshold. Big-4 combined 2025 actual: ~$443B. ~75% is AI infrastructure.
+        </div>
+      </div>
+      <hr/>
+      <div class="sub-grid">
+        <div class="sub-m">
+          <div class="sub-lbl">2025 actual (Big 4)</div>
+          <div class="sub-v">~$443B</div>
+          <div class="sub-d">MSFT+GOOGL+AMZN+META</div>
+        </div>
+        <div class="sub-m">
+          <div class="sub-lbl">AI infra share</div>
+          <div class="sub-v" style="color:var(--blue);">~75%</div>
+          <div class="sub-d">of total capex</div>
+        </div>
+      </div>
+      <div class="prov">Direct from SEC EDGAR 10-Q/10-K — "purchases of property and equipment" line in cash flow statements. Microsoft and Google break out DC vs. other capex in earnings disclosures. Quarterly cadence (~45 days post quarter-end).</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany" class="src-link" target="_blank">SEC EDGAR (10-Q/10-K)</a>
+        <span class="src-lbl">+</span>
+        <a href="https://techblog.comsoc.org/2025/12/22/hyperscaler-capex-600-bn-in-2026-a-36-increase-over-2025-while-global-spending-on-cloud-infrastructure-services-skyrockets/" class="src-link" target="_blank">IEEE ComSoc Analysis</a>
+      </div>
+    </div>
+
+    <!-- M2: GPU Lease Rates -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Market Behavior · M2</div>
+          <div class="ind-title">GPU Lease Rates (H100/H200)</div>
+        </div>
+        <span class="sc-signal sig-mix">B / A border</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--orange);">~$2.25</div>
+        <div class="metric-unit">/hr H100 spot (cloud)</div>
+        <div class="metric-delta d-dn">Declining from ~$3.50</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="leaseChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — H100/H200 Spot Lease Rate ($/hr)</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:40%; background: rgba(78,158,255,0.4);"></div>
+            <div class="thresh-current-marker" style="left:38%;"></div>
+          </div>
+          <span class="thresh-val">&lt;$2.00/hr ← ~$2.25 NOW</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:75%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">$2.50–$3.50/hr (B range)</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.3);"></div>
+          </div>
+          <span class="thresh-val">&gt;$4.00/hr new supply</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--yellow);"></div>
+          At ~$2.25/hr, H100 cloud spot is approaching the Scenario A trigger ($2.00). Softening as B200 supply ramps; Lambda at $2.49, CoreWeave at $2.06–2.89. Watch for breach below $2.00.
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">H100 spot rates from cloud GPU marketplaces (Lambda, CoreWeave, AWS p5 on-demand). Distinct from colocation $/kW/month (CBRE data: $196/kW/month). Spot rates declining as Blackwell supply comes online. Prices are list; volume/contract rates negotiated separately.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-md"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://lambdalabs.com/service/gpu-cloud" class="src-link" target="_blank">Lambda Cloud Pricing</a>
+        <span class="src-lbl">+</span>
+        <a href="https://www.cbre.com/insights/books/north-america-data-center-trends-h2-2025" class="src-link" target="_blank">CBRE DC Trends H2 2025</a>
+      </div>
+    </div>
+
+    <!-- M3: Interconnection Queue Depths -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Market Behavior · M3</div>
+          <div class="ind-title">Interconnection Queue Depths</div>
+        </div>
+        <span class="sc-signal sig-c">C trigger MET</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--red);">226 GW</div>
+        <div class="metric-unit">ERCOT large-load queue</div>
+        <div class="metric-delta d-up">+4× YoY · 77% data centers</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="interconnectChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario C Trigger — Texas (ERCOT) Large-Load Queue</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:50%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">8–12 GW confirmed</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.4);"></div>
+            <div class="thresh-current-marker" style="left:99%;"></div>
+          </div>
+          <span class="thresh-val">&gt;15 GW ← 226 GW NOW</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--scC);"></div>
+          <strong style="color:var(--scC)">Trigger C firing — massively.</strong> At 226 GW (~174 GW data center), ERCOT queue is 15× the C threshold. Note: queue ≠ built capacity; withdrawal rates ~65% historically. Confirmed load is the critical watch metric.
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">LBNL aggregates directly from all US ISOs/RTOs (ERCOT, PJM, MISO, CAISO, SPP, NYISO, ISO-NE). Projects counted after formal interconnection request. DC loads identified by facility type codes. Annual publication; ISO dashboards update monthly.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://emp.lbl.gov/queues" class="src-link" target="_blank">LBNL "Queued Up" 2024</a>
+        <span class="src-lbl">+</span>
+        <a href="https://www.latitudemedia.com/news/ercots-large-load-queue-has-nearly-quadrupled-in-a-single-year/" class="src-link" target="_blank">ERCOT Large-Load Queue Data</a>
+      </div>
+    </div>
+
+    <!-- M4: Data Center Vacancy Rates -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Market Behavior · M4</div>
+          <div class="ind-title">Data Center Vacancy Rates</div>
+        </div>
+        <span class="sc-signal sig-c">C signal (below B floor)</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--red);">1.4%</div>
+        <div class="metric-unit">primary markets avg</div>
+        <div class="metric-delta d-dn">Record low · NV: 0.5%</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="vacancyChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — Primary Market Vacancy Rate</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
+          </div>
+          <span class="thresh-val">&gt;10% (oversupply)</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:60%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">3–8% (healthy)</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:15%; background: rgba(240,82,82,0.4);"></div>
+            <div class="thresh-current-marker" style="left:100%;"></div>
+          </div>
+          <span class="thresh-val">&lt;3% (scarcity) ← 1.4% NOW</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--scC);"></div>
+          <strong style="color:var(--scC)">Signal C.</strong> At 1.4%, vacancy is well below the B floor (3%) — consistent with Scenario C scarcity dynamics. 92% of new supply under construction is pre-committed. Most 2026 capacity already leased.
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">Vacancy = immediately available powered space ÷ total commissioned capacity. Excludes space under construction. CBRE surveys 10 primary N. America markets semi-annually. JLL year-end 2025: vacancy at ~1% for second consecutive year.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://www.cbre.com/insights/reports/north-america-data-center-trends-h1-2025" class="src-link" target="_blank">CBRE H2 2025 DC Trends</a>
+        <span class="src-lbl">+</span>
+        <a href="https://www.jll.com/en-us/newsroom/data-center-availability-crisis-deepens-as-vacancy-hits-historic-low" class="src-link" target="_blank">JLL Availability Crisis</a>
+      </div>
+    </div>
+
+  </div><!-- /Market Behavior grid -->
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  CATEGORY 3: ADOPTION PATTERNS                    -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="section-label sec-adp">
+    <div class="sec-icon">🚀</div>
+    Adoption Patterns
+    <span style="font-size:10px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">GPU shipments · Enterprise ROI · AI patents · Regulatory proposals</span>
+  </div>
+
+  <div class="ind-grid">
+
+    <!-- A1: GPU Shipments -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Adoption Patterns · A1</div>
+          <div class="ind-title">GPU Shipments</div>
+        </div>
+        <span class="sc-signal sig-c">C trigger MET</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--green);">$194B</div>
+        <div class="metric-unit">NVIDIA DC revenue FY2026</div>
+        <div class="metric-delta d-up">+68% YoY</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="gpuChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — GPU/AI Accelerator Shipment Growth</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:15%; background: rgba(78,158,255,0.4);"></div>
+          </div>
+          <span class="thresh-val">Decline QoQ × 3 qtrs</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:65%; background: rgba(62,207,108,0.4);"></div>
+          </div>
+          <span class="thresh-val">20–40% YoY</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.4);"></div>
+            <div class="thresh-current-marker" style="left:96%;"></div>
+          </div>
+          <span class="thresh-val">&gt;50% YoY ← +68% NOW</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--scC);"></div>
+          <strong style="color:var(--scC)">Trigger C firing.</strong> +68% YoY (FY2026) exceeds the 50% threshold. Scenario C requires sustaining >50% through 2027 — this is the key watch metric over next 4 quarters.
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">NVIDIA revenue recognized on shipment to ODMs/OEMs (SEC 10-K/10-Q). Unit shipment counts not publicly disclosed; revenue used as primary proxy. Jon Peddie Research conducts primary channel surveys for unit share data (quarterly).</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://nvidianews.nvidia.com" class="src-link" target="_blank">NVIDIA Investor Relations (SEC)</a>
+        <span class="src-lbl">+</span>
+        <a href="https://carboncredits.com/nvidia-controls-92-of-the-gpu-market-in-2025-and-reveals-next-gen-ai-supercomputer/" class="src-link" target="_blank">Jon Peddie Research</a>
+      </div>
+    </div>
+
+    <!-- A2: Enterprise AI ROI Surveys -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Adoption Patterns · A2</div>
+          <div class="ind-title">Enterprise AI ROI Surveys</div>
+        </div>
+        <span class="sc-signal sig-b">B range</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--yellow);">78%</div>
+        <div class="metric-unit">adoption rate</div>
+        <div class="metric-delta d-warn">39% show EBIT impact</div>
+      </div>
+      <div class="chart-wrap-md">
+        <canvas id="roiChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Thresholds — Enterprises with AI in Production</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:60%; background: rgba(62,207,108,0.4);"></div>
+            <div class="thresh-current-marker" style="left:60%;"></div>
+          </div>
+          <span class="thresh-val">25–35% ← ~39% (near B+)</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <div class="thresh-bar-wrap">
+            <div class="thresh-bar-fill" style="width:80%; background: rgba(240,82,82,0.4);"></div>
+          </div>
+          <span class="thresh-val">&gt;40% triggers C</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--green);"></div>
+          At 39% with measurable EBIT impact, enterprise AI is near the top of the B range and approaching C trigger (>40%). Adoption (78%) far outpaces production deployment — significant headroom.
+        </div>
+      </div>
+      <hr/>
+      <div class="sub-grid">
+        <div class="sub-m">
+          <div class="sub-lbl">GenAI spend 2025</div>
+          <div class="sub-v" style="color:var(--blue);">$644B</div>
+          <div class="sub-d">+76.4% YoY (Gartner)</div>
+        </div>
+        <div class="sub-m">
+          <div class="sub-lbl">Agentic AI scaling</div>
+          <div class="sub-v">23%</div>
+          <div class="sub-d">deploying AI agents now</div>
+        </div>
+      </div>
+      <div class="prov">McKinsey n=1,993 across 105 nations (Jun–Jul 2025). EBIT impact is self-reported; no independent financial verification. "In production" ≈ measurable EBIT impact. Gartner uses bottom-up vendor revenue + IT buyer surveys + macro modeling.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai" class="src-link" target="_blank">McKinsey State of AI 2025</a>
+        <span class="src-lbl">+</span>
+        <a href="https://www.gartner.com/en/newsroom/press-releases/2025-03-31-gartner-forecasts-worldwide-genai-spending-to-reach-644-billion-in-2025" class="src-link" target="_blank">Gartner GenAI Forecast</a>
+      </div>
+    </div>
+
+    <!-- A3: AI Patent Filings -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Adoption Patterns · A3</div>
+          <div class="ind-title">AI Patent Filings</div>
+        </div>
+        <span class="sc-signal sig-b">B / C signal</span>
+      </div>
+      <div class="metric-row">
+        <div class="metric-val" style="color:var(--purple);">275.9K</div>
+        <div class="metric-unit">PCT filings 2025</div>
+        <div class="metric-delta d-up">+0.7% YoY</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="patentChart"></canvas>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Signal — Patent Filing Growth as Innovation Proxy</div>
+        <div class="thresh-status" style="padding-top:0; border-top:none; font-size:10px; color:var(--muted); font-weight:400; line-height:1.5;">
+          No hard scenario trigger thresholds for patent filings. Used as a leading innovation diffusion indicator — sustained filing growth signals that AI R&D investment remains high (B/C); a multi-year decline would be an early A signal. Semiconductor category showed one of the fastest growth rates in 2025 PCT applications. AI-specific USPTO filings up +33% since 2018.
+        </div>
+      </div>
+      <hr/>
+      <div class="sub-grid">
+        <div class="sub-m">
+          <div class="sub-lbl">China (leader)</div>
+          <div class="sub-v" style="color:var(--red);">73,718</div>
+          <div class="sub-d">+5.3% YoY</div>
+        </div>
+        <div class="sub-m">
+          <div class="sub-lbl">US filings</div>
+          <div class="sub-v" style="color:var(--green);">52,617</div>
+          <div class="sub-d">2nd globally</div>
+        </div>
+      </div>
+      <div class="prov">WIPO aggregates directly from national patent offices (USPTO, EPO, JPO, KIPO, CNIPA) under PCT framework. AI classification uses WIPO CPC Y04S codes. Note: AI patent counts vary widely by methodology — WIPO uses narrow IPC-based taxonomy. Annual publication (Oct/Nov).</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://www.wipo.int/web-publications/world-intellectual-property-indicators-2025-highlights/en/patents-highlights.html" class="src-link" target="_blank">WIPO World IP Indicators 2025</a>
+      </div>
+    </div>
+
+    <!-- A4: Regulatory Proposals -->
+    <div class="ind-card">
+      <div class="ind-card-top">
+        <div>
+          <div class="ind-num">Adoption Patterns · A4</div>
+          <div class="ind-title">Regulatory Proposals</div>
+        </div>
+        <span class="sc-signal sig-mix">A/C divergence</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:2px;">
+        <div style="background:rgba(62,207,108,0.07); border:1px solid rgba(62,207,108,0.2); border-radius:8px; padding:8px 10px;">
+          <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;">US Posture</div>
+          <div style="font-size:13px; font-weight:700; color:var(--scC); margin-top:2px;">Deregulatory</div>
+          <div style="font-size:10px; color:var(--muted);">Biden EO rescinded → C signal</div>
+        </div>
+        <div style="background:rgba(78,158,255,0.06); border:1px solid rgba(78,158,255,0.2); border-radius:8px; padding:8px 10px;">
+          <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;">EU Posture</div>
+          <div style="font-size:13px; font-weight:700; color:var(--yellow); margin-top:2px;">Active + Softening</div>
+          <div style="font-size:10px; color:var(--muted);">Omnibus delay in progress → A signal</div>
+        </div>
+      </div>
+      <div class="thresh-panel">
+        <div class="thresh-title">Scenario Signals</div>
+        <div style="font-size:10px; color:var(--muted); margin-bottom:6px; line-height:1.5;">
+          <strong style="color:var(--scA)">A signal:</strong> EU high-risk AI rules (potential 16-month delay via Digital Omnibus) — if energy consumption restrictions on DCs emerge.<br/>
+          <strong style="color:var(--scC)">C signal:</strong> US deregulatory stance removes federal constraints. Geopolitical AI arms race (US/China) prevents meaningful restraint.
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--yellow);"></div>
+          Net effect: regulatory environment is moderately C-supportive in the US, A-adjacent in Europe. Neither jurisdiction has imposed energy consumption caps on data centers yet — the key Scenario A trigger.
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot tl-done"></div>
+          <div><div class="tl-date">Feb 2, 2025 — Done</div><div class="tl-text">EU AI Act: unacceptable-risk prohibitions in force</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot tl-done"></div>
+          <div><div class="tl-date">Aug 2, 2025 — Done</div><div class="tl-text">GPAI model rules active (model cards, training data)</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot tl-now"></div>
+          <div><div class="tl-date">Mar 13, 2026 — Current</div><div class="tl-text">EU Council mandate for Digital Omnibus (possible 16-month delay to high-risk rules)</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot tl-pend"></div>
+          <div><div class="tl-date">Aug 2026 – Dec 2027 — Pending</div><div class="tl-text">High-risk AI compliance deadline (may slip)</div></div>
+        </div>
+      </div>
+      <hr/>
+      <div class="prov">EU: Official Journal of the EU + European Commission press releases. US: Federal Register (executive orders). S. Korea: AI Framework Act Jan 2025. IAPP covers 60+ jurisdictions weekly. OECD AI Policy Observatory: 70+ national strategies.</div>
+      <div class="src-row">
+        <span class="conf-dot conf-hi"></span>
+        <span class="src-lbl">Source:</span>
+        <a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" class="src-link" target="_blank">EU AI Act (Official)</a>
+        <span class="src-lbl">+</span>
+        <a href="https://iapp.org/news/a/global-ai-law-and-policy-tracker-highlights-and-takeaways" class="src-link" target="_blank">IAPP Global AI Law Tracker</a>
+      </div>
+    </div>
+
+  </div><!-- /Adoption Patterns grid -->
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  NRG SCENARIO ACTIONS                             -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="scenario-header" style="margin-top: 40px;">Scenario-Contingent Actions</div>
+  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:20px;">
+
+    <div style="background:rgba(78,158,255,0.05); border:1px solid rgba(78,158,255,0.2); border-radius:12px; padding:18px;">
+      <div style="font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--scA); margin-bottom:8px;">If Scenario A Emerges</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.5;">2+ triggers firing simultaneously. Currently: Edge AI (T4) and GPU lease rates approaching A threshold (M2).</div>
+      <div style="font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px;">IMPACT</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Long-term DC contracts face early termination pressure</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Overcapacity in ERCOT and PJM</div>
+      <div style="font-size:11px; margin-bottom:10px; line-height:1.4; color:var(--text);">→ Pricing pressure on merchant generation</div>
+      <div style="font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px;">ACTION</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Halt uncommitted Phase 3+ builds</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Renegotiate contracts — add efficiency adjustment clauses</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Pivot fleet value to grid reliability &amp; capacity payments</div>
+      <div style="font-size:11px; line-height:1.4; color:var(--text);">→ Accelerate consumer/VPP revenue diversification</div>
+    </div>
+
+    <div style="background:rgba(62,207,108,0.05); border:1px solid rgba(62,207,108,0.2); border-radius:12px; padding:18px; position:relative;">
+      <div style="position:absolute; top:12px; right:12px; background:rgba(62,207,108,0.15); color:var(--green); font-size:9px; font-weight:800; padding:2px 7px; border-radius:8px; border:1px solid rgba(62,207,108,0.3);">CURRENT BASE CASE · 70%</div>
+      <div style="font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--scB); margin-bottom:8px;">Scenario B — Execute Plan</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.5;">Baseline. Look for any 3+ indicators deviating from B confirmation ranges.</div>
+      <div style="font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px;">IMPACT</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Contracted DC pipeline executes on schedule</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Steady predictable demand growth supports fleet utilization</div>
+      <div style="font-size:11px; margin-bottom:10px; line-height:1.4; color:var(--text);">→ Market share, not market size, determines winners</div>
+      <div style="font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px;">ACTION</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Execute phased buildout per plan (GE Vernova/Kiewit JV)</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Maintain 12–15% unlevered IRR discipline on all new contracts</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Build 5–10 year contract duration book (not 20–25)</div>
+      <div style="font-size:11px; line-height:1.4; color:var(--text);">→ Continue BYOP positioning for hyperscaler relationships</div>
+    </div>
+
+    <div style="background:rgba(240,82,82,0.05); border:1px solid rgba(240,82,82,0.2); border-radius:12px; padding:18px;">
+      <div style="font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--scC); margin-bottom:8px;">If Scenario C Emerges</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.5;">3+ triggers firing. Currently: Capex (M1), interconnect queues (M3), vacancy (M4), GPU shipments (A1) already firing.</div>
+      <div style="font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px;">IMPACT</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Scarcity pricing viable ($100+/MWh contracts)</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Build-out cannot keep pace; BTM solutions proliferate</div>
+      <div style="font-size:11px; margin-bottom:10px; line-height:1.4; color:var(--text);">→ Regulatory/political backlash if DC exceeds 12% of US electricity</div>
+      <div style="font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px;">ACTION</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Accelerate all available capacity under contract</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Increase pricing 15–20% on new contracts</div>
+      <div style="font-size:11px; margin-bottom:2px; line-height:1.4; color:var(--text);">→ Expand BYOP aggressively — BTM is the only path to speed</div>
+      <div style="font-size:11px; line-height:1.4; color:var(--text);">→ Pre-position sites, interconnection rights, gas supply for rapid deployment</div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <div>AI Demand Dashboard · Scenario Framework · Q1 2026 · Built on primary public sources</div>
+  <div>Sources: NVIDIA 10-K · CBRE · JLL · Epoch AI · Stanford HAI · LBNL · Artificial Analysis · SEC EDGAR · McKinsey · Gartner · IDC · Counterpoint · WIPO · Lambda/CoreWeave · EU AI Act · IAPP</div>
+</footer>
+
+<script>
+  Chart.defaults.color = '#6b7d96';
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.font.size = 10;
+  const G = 'rgba(42,52,71,0.7)';
+
+  function line(id, labels, datasets, opts = {}) {
+    return new Chart(document.getElementById(id), {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: datasets.length > 1, position: 'bottom', labels: { boxWidth: 8, padding: 6, font: { size: 9 } } }, tooltip: { mode: 'index', intersect: false } },
+        scales: {
+          x: { display: false, grid: { display: false } },
+          y: { grid: { color: G }, ticks: { maxTicksLimit: 4 }, ...opts.yAxis }
+        },
+        elements: { point: { radius: 1.5, hoverRadius: 4 }, line: { tension: 0.4, borderWidth: 2 } },
+        ...opts.extra
+      }
+    });
+  }
+
+  function bar(id, labels, datasets, opts = {}) {
+    return new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: datasets.length > 1, position: 'bottom', labels: { boxWidth: 8, padding: 5, font: { size: 9 } } }, tooltip: { mode: 'index', intersect: false } },
+        scales: {
+          x: { stacked: opts.stacked, grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
+          y: { stacked: opts.stacked, grid: { color: G }, ticks: { maxTicksLimit: 4, ...opts.yTicks } }
+        }
+      }
+    });
+  }
+
+  // ── T1: GPU Perf/Watt ──
+  bar('perfwattChart',
+    ['A100\n2020', 'A30\n2021', 'H100\n2022', 'H200\n2024', 'B200\n2025'],
+    [{ label: 'TFLOPS/W (FP8 equiv)',
+       data: [1.56, 2.1, 5.65, 7.0, 9.0],
+       backgroundColor: ['rgba(168,117,245,0.3)','rgba(168,117,245,0.4)','rgba(168,117,245,0.55)','rgba(168,117,245,0.7)','rgba(168,117,245,0.9)'],
+       borderColor: '#a875f5', borderWidth: 1, borderRadius: 4 }],
+    { yTicks: { callback: v => `${v} TF/W` } }
+  );
+
+  // ── T2: Training Costs ──
+  bar('trainingChart',
+    ['GPT-3\n2020', 'GPT-4\n2023', 'Llama3\n405B', 'Gemini\nUltra', 'Grok 4\n2025'],
+    [{ label: 'Est. training cost ($M)',
+       data: [5, 78, 170, 191, 500],
+       backgroundColor: ['rgba(240,82,82,0.25)','rgba(240,82,82,0.35)','rgba(240,82,82,0.5)','rgba(240,82,82,0.65)','rgba(240,82,82,0.9)'],
+       borderColor: '#f05252', borderWidth: 1, borderRadius: 4 }],
+    { yTicks: { callback: v => `$${v}M` } }
+  );
+
+  // ── T3: Inference API pricing (log) ──
+  new Chart(document.getElementById('inferenceChart'), {
+    type: 'line',
+    data: {
+      labels: ['Nov 22', 'Mar 23', 'Jun 23', 'Nov 23', 'Mar 24', 'Oct 24', 'Mar 25', 'Q1 26'],
+      datasets: [{ label: '$/M tokens (GPT-4 equiv)', data: [20, 12, 6, 3.0, 1.5, 0.15, 0.07, 0.04],
+        borderColor: '#3ecf6c', backgroundColor: 'rgba(62,207,108,0.07)', fill: true }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `$${c.parsed.y}/M tokens` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
+        y: { type: 'logarithmic', grid: { color: G }, ticks: { callback: v => `$${v}`, maxTicksLimit: 5 } }
+      },
+      elements: { point: { radius: 2 }, line: { tension: 0.4, borderWidth: 2 } }
+    }
+  });
+
+  // ── T4: Edge AI devices ──
+  bar('edgeChart',
+    ['2022', '2023', '2024', '2025', '2026E', '2027E'],
+    [{ label: 'GenAI Smartphone Shipments (M)',
+       data: [0, 5, 213, 370, 520, 680],
+       backgroundColor: ['rgba(44,213,204,0.2)','rgba(44,213,204,0.3)','rgba(44,213,204,0.5)','rgba(44,213,204,0.8)','rgba(44,213,204,0.5)','rgba(44,213,204,0.35)'],
+       borderColor: '#2cd5cc', borderWidth: 1, borderRadius: 4 }],
+    { yTicks: { callback: v => `${v}M` } }
+  );
+
+  // ── M1: Hyperscaler Capex ──
+  bar('capexChart',
+    ['2022', '2023', '2024', '2025A', '2026E'],
+    [
+      { label: 'Microsoft', data: [23,32,56,80,96], backgroundColor: 'rgba(78,158,255,0.7)', borderRadius: 3 },
+      { label: 'Alphabet', data: [31,33,52,85,75], backgroundColor: 'rgba(62,207,108,0.7)', borderRadius: 3 },
+      { label: 'Amazon', data: [63,53,83,118,135], backgroundColor: 'rgba(240,130,50,0.7)', borderRadius: 3 },
+      { label: 'Meta', data: [32,28,39,72,65], backgroundColor: 'rgba(168,117,245,0.7)', borderRadius: 3 }
+    ],
+    { stacked: true, yTicks: { callback: v => `$${v}B` } }
+  );
+
+  // ── M2: GPU Lease Rates (H100 spot $/hr) ──
+  line('leaseChart',
+    ['Q1 23', 'Q2 23', 'Q3 23', 'Q4 23', 'Q1 24', 'Q2 24', 'Q3 24', 'Q4 24', 'Q1 25', 'Q2 25', 'Q3 25', 'Q4 25', 'Q1 26'],
+    [
+      { label: 'H100 spot $/hr', data: [null, null, 3.52, 3.25, 3.10, 2.90, 2.72, 2.55, 2.45, 2.35, 2.28, 2.22, 2.19],
+        borderColor: '#f07832', backgroundColor: 'rgba(240,120,50,0.07)', fill: true },
+      { label: 'A threshold ($2.00)', data: Array(13).fill(2.0),
+        borderColor: 'rgba(78,158,255,0.5)', borderDash: [4,3], borderWidth: 1.5, backgroundColor: 'transparent', pointRadius: 0 }
+    ]
+  );
+
+  // ── M3: Interconnection queues ──
+  bar('interconnectChart',
+    ['2020', '2021', '2022', '2023', '2024', 'ERCOT\n2025'],
+    [
+      { label: 'Generation GW', data: [400,680,900,1200,1400,null], backgroundColor: 'rgba(62,207,108,0.55)', borderRadius: 3 },
+      { label: 'Storage GW', data: [80,180,380,660,890,null], backgroundColor: 'rgba(78,158,255,0.55)', borderRadius: 3 },
+      { label: 'ERCOT Large-Load', data: [null,null,null,null,63,226], backgroundColor: 'rgba(240,82,82,0.75)', borderRadius: 3 }
+    ],
+    { stacked: true, yTicks: { callback: v => `${v} GW` } }
+  );
+
+  // ── M4: DC Vacancy Rates ──
+  line('vacancyChart',
+    ['H1 22','H2 22','H1 23','H2 23','H1 24','H2 24','H1 25','H2 25'],
+    [
+      { label: 'Primary Mkts Avg', data: [8.2,6.1,5.0,3.8,2.8,2.1,1.6,1.4],
+        borderColor: '#f05252', backgroundColor: 'rgba(240,82,82,0.07)', fill: true },
+      { label: 'N. Virginia', data: [3.5,2.8,2.2,1.8,1.3,0.9,0.72,0.5],
+        borderColor: '#f07832', borderDash: [4,2], backgroundColor: 'transparent' }
+    ]
+  );
+
+  // ── A1: GPU Shipments ──
+  bar('gpuChart',
+    ['FY22', 'FY23', 'FY24', 'FY25', 'FY26'],
+    [{ label: 'NVIDIA DC Revenue ($B)',
+       data: [10.6, 15.0, 47.5, 115.2, 194.0],
+       backgroundColor: ['rgba(78,158,255,0.3)','rgba(78,158,255,0.4)','rgba(78,158,255,0.55)','rgba(62,207,108,0.65)','rgba(62,207,108,0.9)'],
+       borderColor: ['#4e9eff','#4e9eff','#4e9eff','#3ecf6c','#3ecf6c'], borderWidth: 1, borderRadius: 4 }],
+    { yTicks: { callback: v => `$${v}B` } }
+  );
+
+  // ── A2: Enterprise AI ROI funnel ──
+  bar('roiChart',
+    ['Aware', 'Using', 'Measuring', 'EBIT impact', 'High perf.'],
+    [{ label: '% of enterprises',
+       data: [95, 78, 54, 39, 5.5],
+       backgroundColor: ['rgba(78,158,255,0.4)','rgba(78,158,255,0.6)','rgba(232,162,42,0.5)','rgba(232,162,42,0.7)','rgba(62,207,108,0.85)'],
+       borderRadius: 4 }],
+    { yTicks: { callback: v => `${v}%`, max: 100 } }
+  );
+
+  // ── A3: AI Patents (horizontal) ──
+  new Chart(document.getElementById('patentChart'), {
+    type: 'bar',
+    data: {
+      labels: ['China', 'US', 'Japan', 'S.Korea', 'Germany'],
+      datasets: [{ label: 'PCT Filings 2025',
+        data: [73718, 52617, 47922, 25016, 16441],
+        backgroundColor: ['rgba(240,82,82,0.75)','rgba(62,207,108,0.75)','rgba(78,158,255,0.75)','rgba(232,162,42,0.75)','rgba(168,117,245,0.75)'],
+        borderRadius: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.parsed.x.toLocaleString()} filings` } } },
+      scales: {
+        x: { grid: { color: G }, ticks: { callback: v => `${(v/1000).toFixed(0)}K`, font: { size: 9 } } },
+        y: { grid: { display: false }, ticks: { font: { size: 9 } } }
+      }
+    }
+  });
+</script>
+
+</div><!-- /app -->
+</body>
+</html>
