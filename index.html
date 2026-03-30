@@ -260,30 +260,44 @@
     .chart-wrap { position: relative; height: 82px; }
     .chart-wrap-md { position: relative; height: 110px; }
 
-    /* Scenario threshold gauge */
+    /* Scenario threshold table */
     .thresh-panel {
-      background: var(--surface2); border-radius: 8px; padding: 10px 12px;
+      background: var(--surface2); border-radius: 8px; padding: 12px 14px;
       border: 1px solid var(--border);
     }
-    .thresh-title { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .thresh-row { display: flex; gap: 4px; margin-bottom: 6px; align-items: center; }
-    .thresh-sc-label { font-size: 9px; font-weight: 700; width: 16px; flex-shrink: 0; }
-    .thresh-a-l { color: var(--scA); }
-    .thresh-b-l { color: var(--scB); }
-    .thresh-c-l { color: var(--scC); }
-    .thresh-bar-wrap { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.05); position: relative; overflow: visible; }
-    .thresh-bar-fill { height: 100%; border-radius: 3px; }
-    .thresh-val { font-size: 9px; color: var(--muted); width: 80px; text-align: right; font-weight: 500; }
-    .thresh-current-marker {
-      position: absolute; top: -3px; width: 2px; height: 12px;
-      background: var(--yellow); border-radius: 1px;
-      box-shadow: 0 0 4px var(--yellow);
+    .thresh-title {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .thresh-row {
+      display: grid; grid-template-columns: 26px 1fr;
+      gap: 10px; align-items: baseline;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .thresh-row:last-of-type { border-bottom: none; margin-bottom: 4px; }
+    .thresh-sc-label {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.3px;
+      padding: 2px 0; border-radius: 4px; text-align: center;
+    }
+    .thresh-a-l { color: var(--scA); background: rgba(78,158,255,0.14); }
+    .thresh-b-l { color: var(--scB); background: rgba(62,207,108,0.12); }
+    .thresh-c-l { color: var(--scC); background: rgba(240,82,82,0.12); }
+    .thresh-desc { font-size: 10px; color: var(--text); line-height: 1.5; }
+    .thresh-now {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      padding: 1px 6px; border-radius: 3px; margin-left: 6px;
+      background: rgba(232,162,42,0.18); color: var(--yellow);
+      border: 1px solid rgba(232,162,42,0.3);
+      white-space: nowrap; vertical-align: middle;
     }
     .thresh-status {
-      font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 5px;
-      padding-top: 6px; border-top: 1px solid var(--border);
+      font-size: 10px; font-weight: 400;
+      display: flex; align-items: flex-start; gap: 7px;
+      padding-top: 9px; border-top: 1px solid var(--border);
+      line-height: 1.55; color: var(--muted);
     }
-    .thresh-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .thresh-status strong { font-weight: 700; }
+    .thresh-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
 
     /* Sub-metrics */
     .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -426,12 +440,12 @@
     </div>
 
     <!-- Scenario B -->
-    <div class="sc-card sc-b" style="position:relative;">
-      <div style="position:absolute;top:12px;right:12px;"><span class="trending-badge">● Base Case</span></div>
+    <div class="sc-card sc-b">
       <div class="sc-badge-row">
         <span class="sc-label">Scenario B</span>
-        <span style="font-size:11px; color:var(--green); font-weight:700;">↑ from 50% Nov'24</span>
+        <span class="trending-badge">● Base Case</span>
       </div>
+      <div style="font-size:11px; color:var(--green); font-weight:600; margin-bottom:6px; margin-top:-4px;">↑ from 50% Nov '24 · probability stable</div>
       <div class="sc-name">"Balanced Growth"</div>
       <div class="sc-thesis">Efficiency and adoption grow in parallel. Jevons rebound at 100–130%. Steady, strong demand growth through 2028 then gradual deceleration.</div>
       <div class="prob-row">
@@ -522,33 +536,22 @@
         <canvas id="perfwattChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — Efficiency Gain Rate</div>
+        <div class="thresh-title">Scenario Thresholds — Annual Efficiency Gain Rate (TFLOPS/W)</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
-            <div class="thresh-current-marker" style="left:60%;"></div>
-          </div>
-          <span class="thresh-val">&gt;40%/yr ← triggers A</span>
+          <span class="thresh-desc">&gt;40%/yr — efficiency outpaces adoption, demand plateaus</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:75%; background: rgba(62,207,108,0.4);"></div>
-            <div class="thresh-current-marker" style="left:60%;"></div>
-          </div>
-          <span class="thresh-val">25–35%/yr (B range)</span>
+          <span class="thresh-desc">25–35%/yr gain rate (balanced) <span class="thresh-now">~NOW</span></span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:35%; background: rgba(240,82,82,0.3);"></div>
-          </div>
-          <span class="thresh-val">&lt;20%/yr → more C</span>
+          <span class="thresh-desc">&lt;20%/yr — adoption demand outpaces hardware efficiency</span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--yellow);"></div>
-          Current: ~30–40%/yr CAGR (A100→H100→B200) — borderline A/B. Trajectory acceleration with Rubin NVL 2026 expected to push into A territory.
+          <span>Current ~30–40%/yr CAGR (A100→H100→B200) — borderline A/B. Rubin NVL (2026E) expected to push trajectory into A territory.</span>
         </div>
       </div>
       <hr/>
@@ -592,32 +595,22 @@
         <canvas id="trainingChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — YoY Cost Change</div>
+        <div class="thresh-title">Scenario Thresholds — YoY Training Cost Change</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
-          </div>
-          <span class="thresh-val">Drop &gt;70%/yr × 2 yrs</span>
+          <span class="thresh-desc">Drop &gt;70%/yr for 2 consecutive years</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:65%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">Declining 30–40%/yr</span>
+          <span class="thresh-desc">Declining 30–40%/yr at commodity tier</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:25%; background: rgba(240,82,82,0.4);"></div>
-            <div class="thresh-current-marker" style="left:100%;"></div>
-          </div>
-          <span class="thresh-val">Rising / stable ← NOW</span>
+          <span class="thresh-desc">Rising or stable at frontier level <span class="thresh-now">NOW: +2.4×/yr</span></span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--red);"></div>
-          Frontier costs escalating +2.4×/yr (Epoch AI). Signals Scenario C at the margin — but commodity inference (not training) is declining rapidly.
+          <span>Frontier costs escalating +2.4×/yr (Epoch AI) — signals Scenario C at the frontier. Commodity inference is declining rapidly, consistent with B. The split between frontier and commodity is the key tension.</span>
         </div>
       </div>
       <hr/>
@@ -649,32 +642,22 @@
         <canvas id="inferenceChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — Annual Price Decline Rate</div>
+        <div class="thresh-title">Scenario Thresholds — Annual Inference Price Decline Rate</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
-            <div class="thresh-current-marker" style="left:90%;"></div>
-          </div>
-          <span class="thresh-val">&gt;50%/yr, vol flat ← ≈NOW</span>
+          <span class="thresh-desc">&gt;50%/yr without proportional volume growth <span class="thresh-now">~NOW on price alone</span></span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:70%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">Decline + prop. volume</span>
+          <span class="thresh-desc">Price declining with proportional adoption growth (Jevons intact) <span class="thresh-now">~NOW on volume</span></span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:30%; background: rgba(240,82,82,0.3);"></div>
-          </div>
-          <span class="thresh-val">Price floor stabilizes</span>
+          <span class="thresh-desc">Price floor stabilizes as demand exceeds inference supply</span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--yellow);"></div>
-          Price decline rate (~10×/yr) exceeds A threshold. But volume IS scaling proportionally — Jevons rebound intact → leaning B, not pure A.
+          <span>Price decline (~10×/yr) exceeds A threshold, but volume IS scaling proportionally — Jevons rebound intact. Net reading: leaning B, not pure A. Watch for volume growth to decouple from price drops.</span>
         </div>
       </div>
       <hr/>
@@ -709,15 +692,19 @@
         <div class="thresh-title">Scenario A Trigger — Annual Edge AI Device Shipments</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
-            <div class="thresh-current-marker" style="left:97%;"></div>
-          </div>
-          <span class="thresh-val">&gt;100M/yr ← 370M NOW</span>
+          <span class="thresh-desc">&gt;100M GenAI-capable devices/yr — edge meaningfully offloads centralized inference <span class="thresh-now">NOW: 370M (3.7×)</span></span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <span class="thresh-desc">30–100M/yr — edge mainstream but cloud inference remains dominant</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <span class="thresh-desc">&lt;30M/yr — centralized cloud inference wins, no meaningful edge offset</span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--scA);"></div>
-          <strong style="color:var(--scA)">Trigger A firing.</strong> At 370M units, this threshold (>100M) is exceeded 3.7×. However, edge AI offloads centralized inference only if these devices actively replace cloud calls — still debated.
+          <span><strong style="color:var(--scA)">Trigger A firing.</strong> At 370M units the threshold is exceeded 3.7×. However, edge AI offloads centralized inference only if devices actively replace cloud API calls — the substitution effect is still debated in practice.</span>
         </div>
       </div>
       <hr/>
@@ -774,32 +761,22 @@
         <canvas id="capexChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — YoY Capex Growth Rate</div>
+        <div class="thresh-title">Scenario Thresholds — YoY Hyperscaler Capex Growth Rate</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:25%; background: rgba(78,158,255,0.4);"></div>
-          </div>
-          <span class="thresh-val">&lt;10%/yr growth</span>
+          <span class="thresh-desc">Decelerates below 10%/yr — investment growth stalls</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:70%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">15–30%/yr (B range)</span>
+          <span class="thresh-desc">15–30%/yr sustained growth (B confirmation range)</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.4);"></div>
-            <div class="thresh-current-marker" style="left:90%;"></div>
-          </div>
-          <span class="thresh-val">&gt;35%/yr ← 36% NOW</span>
+          <span class="thresh-desc">Sustained above 35%/yr <span class="thresh-now">NOW: +36%</span></span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--scC);"></div>
-          <strong style="color:var(--scC)">Trigger C firing.</strong> At +36% YoY, hyperscaler capex has crossed the Scenario C threshold. Big-4 combined 2025 actual: ~$443B. ~75% is AI infrastructure.
+          <span><strong style="color:var(--scC)">Trigger C firing.</strong> At +36% YoY, hyperscaler capex has crossed the Scenario C threshold. Big-4 combined 2025 actual: ~$443B, with ~75% directed at AI infrastructure.</span>
         </div>
       </div>
       <hr/>
@@ -843,32 +820,22 @@
         <canvas id="leaseChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — H100/H200 Spot Lease Rate ($/hr)</div>
+        <div class="thresh-title">Scenario Thresholds — H100/H200 Cloud Spot Rate ($/hr)</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:40%; background: rgba(78,158,255,0.4);"></div>
-            <div class="thresh-current-marker" style="left:38%;"></div>
-          </div>
-          <span class="thresh-val">&lt;$2.00/hr ← ~$2.25 NOW</span>
+          <span class="thresh-desc">Falls below $2.00/hr — supply exceeds demand <span class="thresh-now">~$2.25 today, approaching</span></span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:75%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">$2.50–$3.50/hr (B range)</span>
+          <span class="thresh-desc">Stable at $2.50–$3.50/hr — healthy supply/demand balance</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.3);"></div>
-          </div>
-          <span class="thresh-val">&gt;$4.00/hr new supply</span>
+          <span class="thresh-desc">Rising above $4.00/hr despite new supply — demand crushes supply</span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--yellow);"></div>
-          At ~$2.25/hr, H100 cloud spot is approaching the Scenario A trigger ($2.00). Softening as B200 supply ramps; Lambda at $2.49, CoreWeave at $2.06–2.89. Watch for breach below $2.00.
+          <span>At ~$2.25/hr, H100 spot is approaching the Scenario A floor ($2.00). Softening as B200 supply ramps; Lambda at $2.49, CoreWeave at $2.06–$2.89. Watch for a breach below $2.00 as Blackwell ramps further.</span>
         </div>
       </div>
       <hr/>
@@ -900,25 +867,22 @@
         <canvas id="interconnectChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario C Trigger — Texas (ERCOT) Large-Load Queue</div>
+        <div class="thresh-title">Scenario Thresholds — ERCOT (Texas) Large-Load Interconnection Queue</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <span class="thresh-desc">Queue declining, withdrawals accelerating — demand signal weakening</span>
+        </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:50%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">8–12 GW confirmed</span>
+          <span class="thresh-desc">8–12 GW of confirmed large-load requests in TX / OH / VA</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.4);"></div>
-            <div class="thresh-current-marker" style="left:99%;"></div>
-          </div>
-          <span class="thresh-val">&gt;15 GW ← 226 GW NOW</span>
+          <span class="thresh-desc">Above 15 GW in Texas alone <span class="thresh-now">NOW: 226 GW (15× threshold)</span></span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--scC);"></div>
-          <strong style="color:var(--scC)">Trigger C firing — massively.</strong> At 226 GW (~174 GW data center), ERCOT queue is 15× the C threshold. Note: queue ≠ built capacity; withdrawal rates ~65% historically. Confirmed load is the critical watch metric.
+          <span><strong style="color:var(--scC)">Trigger C firing — massively.</strong> At 226 GW (~174 GW data center), ERCOT queue is 15× the C threshold. Note: queue ≠ built capacity; ~65% withdrawal rate historically. Confirmed load is the critical watch metric.</span>
         </div>
       </div>
       <hr/>
@@ -950,32 +914,22 @@
         <canvas id="vacancyChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — Primary Market Vacancy Rate</div>
+        <div class="thresh-title">Scenario Thresholds — Primary Market Data Center Vacancy Rate</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(78,158,255,0.4);"></div>
-          </div>
-          <span class="thresh-val">&gt;10% (oversupply)</span>
+          <span class="thresh-desc">Above 10% — overcapacity, demand collapsed</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:60%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">3–8% (healthy)</span>
+          <span class="thresh-desc">3–8% — healthy supply/demand balance</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:15%; background: rgba(240,82,82,0.4);"></div>
-            <div class="thresh-current-marker" style="left:100%;"></div>
-          </div>
-          <span class="thresh-val">&lt;3% (scarcity) ← 1.4% NOW</span>
+          <span class="thresh-desc">Below 3% scarcity pricing <span class="thresh-now">NOW: 1.4%</span></span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--scC);"></div>
-          <strong style="color:var(--scC)">Signal C.</strong> At 1.4%, vacancy is well below the B floor (3%) — consistent with Scenario C scarcity dynamics. 92% of new supply under construction is pre-committed. Most 2026 capacity already leased.
+          <span><strong style="color:var(--scC)">Signal C.</strong> At 1.4%, vacancy is well below the B floor (3%). 92% of new supply under construction is pre-committed. Most 2026 capacity is already leased into 2027+.</span>
         </div>
       </div>
       <hr/>
@@ -1020,32 +974,22 @@
         <canvas id="gpuChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — GPU/AI Accelerator Shipment Growth</div>
+        <div class="thresh-title">Scenario Thresholds — GPU / AI Accelerator Shipment Growth (YoY)</div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-a-l">A</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:15%; background: rgba(78,158,255,0.4);"></div>
-          </div>
-          <span class="thresh-val">Decline QoQ × 3 qtrs</span>
+          <span class="thresh-desc">Decline QoQ for 3 or more consecutive quarters</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:65%; background: rgba(62,207,108,0.4);"></div>
-          </div>
-          <span class="thresh-val">20–40% YoY</span>
+          <span class="thresh-desc">20–40% YoY growth (decelerating from 2025 peak)</span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:100%; background: rgba(240,82,82,0.4);"></div>
-            <div class="thresh-current-marker" style="left:96%;"></div>
-          </div>
-          <span class="thresh-val">&gt;50% YoY ← +68% NOW</span>
+          <span class="thresh-desc">Sustain above 50% YoY through 2027 <span class="thresh-now">NOW: +68%</span></span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--scC);"></div>
-          <strong style="color:var(--scC)">Trigger C firing.</strong> +68% YoY (FY2026) exceeds the 50% threshold. Scenario C requires sustaining >50% through 2027 — this is the key watch metric over next 4 quarters.
+          <span><strong style="color:var(--scC)">Trigger C firing.</strong> +68% YoY (FY2026) exceeds the 50% threshold. Scenario C requires sustaining this through 2027 — the key watch metric over the next 4 quarters.</span>
         </div>
       </div>
       <hr/>
@@ -1077,25 +1021,22 @@
         <canvas id="roiChart"></canvas>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Thresholds — Enterprises with AI in Production</div>
+        <div class="thresh-title">Scenario Thresholds — Enterprises with AI in Production (EBIT impact)</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <span class="thresh-desc">Below 15% in production, ROI surveys declining</span>
+        </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-b-l">B</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:60%; background: rgba(62,207,108,0.4);"></div>
-            <div class="thresh-current-marker" style="left:60%;"></div>
-          </div>
-          <span class="thresh-val">25–35% ← ~39% (near B+)</span>
+          <span class="thresh-desc">25–35% with measurable EBIT impact <span class="thresh-now">~NOW: 39%</span></span>
         </div>
         <div class="thresh-row">
           <span class="thresh-sc-label thresh-c-l">C</span>
-          <div class="thresh-bar-wrap">
-            <div class="thresh-bar-fill" style="width:80%; background: rgba(240,82,82,0.4);"></div>
-          </div>
-          <span class="thresh-val">&gt;40% triggers C</span>
+          <span class="thresh-desc">Above 40% of enterprises — approaching C trigger</span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--green);"></div>
-          At 39% with measurable EBIT impact, enterprise AI is near the top of the B range and approaching C trigger (>40%). Adoption (78%) far outpaces production deployment — significant headroom.
+          <span>At 39% with measurable EBIT impact, enterprise AI is at the top of the B range and approaching the C trigger (&gt;40%). Adoption (78%) far outpaces production deployment — significant headroom for growth.</span>
         </div>
       </div>
       <hr/>
@@ -1140,8 +1081,21 @@
       </div>
       <div class="thresh-panel">
         <div class="thresh-title">Scenario Signal — Patent Filing Growth as Innovation Proxy</div>
-        <div class="thresh-status" style="padding-top:0; border-top:none; font-size:10px; color:var(--muted); font-weight:400; line-height:1.5;">
-          No hard scenario trigger thresholds for patent filings. Used as a leading innovation diffusion indicator — sustained filing growth signals that AI R&D investment remains high (B/C); a multi-year decline would be an early A signal. Semiconductor category showed one of the fastest growth rates in 2025 PCT applications. AI-specific USPTO filings up +33% since 2018.
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <span class="thresh-desc">Multi-year decline in AI patent filings — R&amp;D investment cooling</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <span class="thresh-desc">Steady growth across major jurisdictions <span class="thresh-now">NOW: +0.7% PCT</span></span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <span class="thresh-desc">Accelerating filings in semiconductors &amp; AI systems categories</span>
+        </div>
+        <div class="thresh-status">
+          <div class="thresh-status-dot" style="background:var(--green);"></div>
+          <span>No hard trigger thresholds. Used as a leading innovation diffusion indicator — sustained growth signals AI R&amp;D investment remains high (B/C). Semiconductor PCT filings showed one of the fastest category growth rates in 2025. AI-specific USPTO filings up +33% since 2018.</span>
         </div>
       </div>
       <hr/>
@@ -1187,14 +1141,22 @@
         </div>
       </div>
       <div class="thresh-panel">
-        <div class="thresh-title">Scenario Signals</div>
-        <div style="font-size:10px; color:var(--muted); margin-bottom:6px; line-height:1.5;">
-          <strong style="color:var(--scA)">A signal:</strong> EU high-risk AI rules (potential 16-month delay via Digital Omnibus) — if energy consumption restrictions on DCs emerge.<br/>
-          <strong style="color:var(--scC)">C signal:</strong> US deregulatory stance removes federal constraints. Geopolitical AI arms race (US/China) prevents meaningful restraint.
+        <div class="thresh-title">Scenario Signals — Regulatory Stance</div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-a-l">A</span>
+          <span class="thresh-desc">DC energy consumption caps enacted; hard limits on AI compute emerge</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-b-l">B</span>
+          <span class="thresh-desc">Balanced national AI strategies; sector-specific rules without hard energy caps</span>
+        </div>
+        <div class="thresh-row">
+          <span class="thresh-sc-label thresh-c-l">C</span>
+          <span class="thresh-desc">US deregulatory + geopolitical arms race prevents any meaningful constraint <span class="thresh-now">~NOW (US)</span></span>
         </div>
         <div class="thresh-status">
           <div class="thresh-status-dot" style="background:var(--yellow);"></div>
-          Net effect: regulatory environment is moderately C-supportive in the US, A-adjacent in Europe. Neither jurisdiction has imposed energy consumption caps on data centers yet — the key Scenario A trigger.
+          <span>Net: moderately C-supportive in US (Biden EO rescinded, AI Action Plan deregulatory), A-adjacent in EU (Omnibus delay, potential future DC energy caps). Neither jurisdiction has yet imposed hard AI compute or DC energy limits — the key Scenario A trigger to watch.</span>
         </div>
       </div>
       <div class="timeline">
