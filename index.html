@@ -212,26 +212,46 @@
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 8px;
     }
+    /* Threshold met badges — scenario-coloured variants */
     .thresh-met-badge {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px;
+      letter-spacing: 0.3px;
+    }
+    .thresh-met-badge-a {
+      background: rgba(78,158,255,0.2); color: var(--scA);
+      border: 1px solid rgba(78,158,255,0.4);
+      animation: pulseBlue 2.5s infinite;
+    }
+    .thresh-met-badge-c {
       background: rgba(240,82,82,0.2); color: var(--red);
-      border: 1px solid rgba(240,82,82,0.4); letter-spacing: 0.3px;
+      border: 1px solid rgba(240,82,82,0.4);
       animation: pulseRed 2.5s infinite;
     }
-    @keyframes pulseRed { 0%,100% { box-shadow: 0 0 0px rgba(240,82,82,0); } 50% { box-shadow: 0 0 8px rgba(240,82,82,0.5); } }
+    @keyframes pulseBlue { 0%,100% { box-shadow: 0 0 0px rgba(78,158,255,0); } 50% { box-shadow: 0 0 8px rgba(78,158,255,0.5); } }
+    @keyframes pulseRed  { 0%,100% { box-shadow: 0 0 0px rgba(240,82,82,0);  } 50% { box-shadow: 0 0 8px rgba(240,82,82,0.5);  } }
+
+    /* Threshold-met alert boxes */
     .trigger-alert-box {
-      background: rgba(240,82,82,0.07); border: 1px solid rgba(240,82,82,0.25);
       border-radius: 8px; padding: 9px 12px; margin-top: 8px;
       font-size: 10px; line-height: 1.55; color: var(--muted);
     }
-    .trigger-alert-box strong { color: var(--red); font-weight: 700; }
     .trigger-alert-box .ta-distinction {
       margin-top: 6px; padding-top: 6px;
-      border-top: 1px solid rgba(240,82,82,0.2);
       font-size: 9.5px; color: var(--muted2);
     }
-    /* B-scenario C-tension note */
+    .tab-a {
+      background: rgba(78,158,255,0.07); border: 1px solid rgba(78,158,255,0.25);
+    }
+    .tab-a strong { color: var(--scA); font-weight: 700; }
+    .tab-a .ta-distinction { border-top: 1px solid rgba(78,158,255,0.2); }
+    .tab-c {
+      background: rgba(240,82,82,0.07); border: 1px solid rgba(240,82,82,0.25);
+    }
+    .tab-c strong { color: var(--red); font-weight: 700; }
+    .tab-c .ta-distinction { border-top: 1px solid rgba(240,82,82,0.2); }
+
+    /* B-scenario dual-tension note */
     .b-tension-note {
       background: rgba(232,162,42,0.07); border: 1px solid rgba(232,162,42,0.2);
       border-radius: 7px; padding: 8px 11px; margin-top: 8px;
@@ -441,8 +461,9 @@
     <div class="sc-card sc-a">
       <div class="sc-badge-row">
         <span class="sc-label">Scenario A</span>
-        <span style="font-size:11px; color:var(--muted);">↓ from 25% Nov'24</span>
+        <span class="thresh-met-badge thresh-met-badge-a">⚠ Trigger Threshold Met</span>
       </div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:6px; margin-top:-4px;">↓ from 25% Nov '24 · probability stable</div>
       <div class="sc-name">"Efficiency Wins"</div>
       <div class="sc-thesis">Efficiency gains outrun adoption. Demand plateaus as hardware/software improvements exceed 40%/yr and Jevons rebound stays below 50%.</div>
       <div class="prob-row">
@@ -468,7 +489,13 @@
         <div class="trigger-dot t-cold"></div>
         <div class="trigger-dot t-cold"></div>
         <div class="trigger-dot t-cold"></div>
-        <span class="trigger-label">2 of 6 triggers firing (need 2+)</span>
+        <span class="trigger-label-alert" style="color:var(--scA);">2 of 6 triggers firing — THRESHOLD MET (need 2+)</span>
+      </div>
+      <div class="trigger-alert-box tab-a">
+        <strong>Scenario A is also actively emerging.</strong> Inference API pricing (−280× since Nov 2022, well above the 50%/yr threshold) and Edge AI device volumes (370M units, 3.7× the 100M trigger) have both crossed Scenario A thresholds.
+        <div class="ta-distinction">
+          <strong style="color:var(--muted);">Why is probability still 15%?</strong> Both triggers have a critical qualifier. Inference price collapse is accompanied by <em>proportional volume growth</em> — the Jevons rebound is intact, which is a B signal, not A. Edge AI at 370M devices has not yet demonstrated <em>meaningful substitution</em> for centralized inference; devices are additive, not replacing cloud calls. Meanwhile, GPU shipments (+68%), capex (+36%), and DC vacancy (1.4%) are all strongly counter-signaling. For A to gain probability, Jevons rebound must fall below 50% — currently tracking at ~100–130%.
+        </div>
       </div>
     </div>
 
@@ -501,7 +528,7 @@
         <span style="font-size:10px; color:var(--muted);">Confirmation range — watch for deviation</span>
       </div>
       <div class="b-tension-note">
-        <strong>⚠ Active tension with Scenario C.</strong> Current indicator readings are tracking C-directional (4 of 7 C triggers met). B remains the 2030 base case because sustained 50%+ YoY GPU growth and 35%+ capex growth through 2027 is historically unprecedented at this scale. If these rates hold for 2 more years without deceleration, a probability shift toward C is warranted.
+        <strong>⚠ Active tension with both A and C.</strong> All three scenario trigger thresholds are currently met simultaneously — A (2 of 6), B (confirmation range), and C (4 of 7). This reflects a genuine bifurcation: efficiency signals (inference pricing, edge AI) point toward A, while demand signals (GPU shipments, capex, vacancy, queues) point toward C. B remains the 2030 base case because the Jevons rebound (~100–130%) keeps both A and C from dominating. The critical watch: does the rebound rate hold, accelerate, or collapse?
       </div>
     </div>
 
@@ -509,7 +536,7 @@
     <div class="sc-card sc-c">
       <div class="sc-badge-row">
         <span class="sc-label">Scenario C</span>
-        <span class="thresh-met-badge">⚠ Trigger Threshold Met</span>
+        <span class="thresh-met-badge thresh-met-badge-c">⚠ Trigger Threshold Met</span>
       </div>
       <div style="font-size:11px; color:var(--muted); margin-bottom:6px; margin-top:-4px;">→ stable at 15% since Dec '25</div>
       <div class="sc-name">"Jevons Dominates"</div>
@@ -540,7 +567,7 @@
         <div class="trigger-dot t-cold"></div>
         <span class="trigger-label-alert">4 of 7 triggers firing — THRESHOLD MET (need 3+)</span>
       </div>
-      <div class="trigger-alert-box">
+      <div class="trigger-alert-box tab-c">
         <strong>Scenario C is actively emerging.</strong> GPU shipments (+68% YoY), hyperscaler capex (+36%), interconnection queue depth (226 GW ERCOT), and DC vacancy (1.4%) have all crossed Scenario C thresholds simultaneously.
         <div class="ta-distinction">
           <strong style="color:var(--muted);">Why is probability still 15%?</strong> Triggers firing <em>today</em> confirm current momentum is C-directional. The 2030 probability reflects whether this pace is <em>sustained for 4+ years</em> — which requires GPU shipment growth to hold above 50% YoY through 2027, capex to stay above 35%, and no regulatory or physical grid constraint to emerge. Scenario B (70%) remains the base case because historical precedent strongly favors deceleration as markets normalize after a supply shock.
