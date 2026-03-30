@@ -398,6 +398,218 @@
     .nrg-item { font-size: 10px; color: var(--text); margin-bottom: 2px; line-height: 1.4; }
     .nrg-item::before { content: '→ '; color: var(--purple); }
 
+    /* ═══ Jevons Rebound Rate Master Panel ═══ */
+    .jevons-panel {
+      background: var(--surface);
+      border: 1px solid rgba(232,162,42,0.35);
+      border-radius: 14px; padding: 22px 24px;
+      margin-bottom: 32px; position: relative;
+    }
+    .jevons-panel::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      border-radius: 14px 14px 0 0;
+      background: linear-gradient(90deg, var(--yellow) 0%, rgba(232,162,42,0.15) 100%);
+    }
+    .jevons-panel-hdr {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .jevons-icon {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(232,162,42,0.12); border: 1px solid rgba(232,162,42,0.3);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .jevons-hdr-text { flex: 1; min-width: 0; }
+    .jevons-panel-title { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+    .jevons-panel-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .jevons-arbiter-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 6px;
+      background: rgba(232,162,42,0.12); color: var(--yellow);
+      border: 1px solid rgba(232,162,42,0.25); white-space: nowrap;
+    }
+    .jevons-conf-badge {
+      margin-left: auto; font-size: 9px; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 9px; white-space: nowrap;
+    }
+
+    /* 3-column body grid */
+    .jevons-body {
+      display: grid; grid-template-columns: 190px 1fr 250px;
+      gap: 20px; margin-bottom: 16px;
+    }
+
+    /* Column 1 — metric */
+    .jevons-metric-val {
+      font-size: 52px; font-weight: 900; letter-spacing: -2px;
+      line-height: 1; color: var(--yellow);
+    }
+    .jevons-metric-lbl { font-size: 10px; color: var(--muted); margin-top: 5px; }
+    .jevons-metric-trend {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 5px; margin-top: 7px;
+      background: rgba(232,162,42,0.12); color: var(--yellow);
+    }
+    .jevons-metric-def {
+      font-size: 10px; color: var(--muted); line-height: 1.55;
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+    }
+
+    /* Column 2 — gauge */
+    .jevons-gauge-lbl {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .jevons-gauge {
+      height: 30px; border-radius: 8px;
+      display: flex; position: relative; overflow: visible;
+    }
+    .gauge-seg { height: 100%; }
+    .gauge-seg-a {
+      flex: 20; background: rgba(78,158,255,0.22); border-radius: 8px 0 0 8px;
+      border: 1px solid rgba(78,158,255,0.2); border-right: none;
+    }
+    .gauge-seg-b {
+      flex: 60; background: rgba(62,207,108,0.12); position: relative;
+      border-top: 1px solid rgba(62,207,108,0.2);
+      border-bottom: 1px solid rgba(62,207,108,0.2);
+    }
+    .gauge-sweet-spot {
+      position: absolute; top: 0; bottom: 0;
+      left: 33.3%; width: 20%;
+      background: rgba(62,207,108,0.42);
+      border-left: 1px dashed rgba(62,207,108,0.5);
+      border-right: 1px dashed rgba(62,207,108,0.5);
+    }
+    .gauge-seg-c {
+      flex: 20; background: rgba(240,82,82,0.22); border-radius: 0 8px 8px 0;
+      border: 1px solid rgba(240,82,82,0.2); border-left: none;
+    }
+    .gauge-needle {
+      position: absolute; top: -5px; bottom: -5px; width: 3px;
+      background: var(--yellow); border-radius: 2px; transform: translateX(-50%);
+      box-shadow: 0 0 8px rgba(232,162,42,0.7); z-index: 10;
+    }
+    .gauge-needle::after {
+      content: '▲'; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%); color: var(--yellow);
+      font-size: 7px; line-height: 1; margin-top: 1px;
+    }
+    .gauge-needle-label {
+      position: absolute; bottom: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      font-size: 9px; font-weight: 800; color: var(--yellow);
+      background: var(--surface); padding: 1px 5px; border-radius: 4px;
+      border: 1px solid rgba(232,162,42,0.35);
+    }
+    .gauge-zone-row {
+      display: flex; gap: 3px; margin-top: 6px;
+    }
+    .gauge-zone-pill {
+      text-align: center; font-size: 9px; font-weight: 700;
+      padding: 3px 0; border-radius: 4px;
+    }
+    .gauge-zone-pill-a { flex: 20; background: rgba(78,158,255,0.1); color: var(--scA); }
+    .gauge-zone-pill-b { flex: 60; background: rgba(62,207,108,0.08); color: var(--scB); }
+    .gauge-zone-pill-c { flex: 20; background: rgba(240,82,82,0.1); color: var(--scC); }
+    .gauge-tick-row {
+      display: flex; justify-content: space-between;
+      font-size: 8px; color: var(--muted2); margin-top: 3px;
+      padding: 0 1px;
+    }
+    .gauge-callout {
+      margin-top: 12px; font-size: 10px; color: var(--muted); line-height: 1.55;
+      padding: 8px 10px;
+      background: rgba(232,162,42,0.06); border-radius: 6px;
+      border: 1px solid rgba(232,162,42,0.18);
+    }
+    .gauge-callout strong { color: var(--yellow); font-weight: 700; }
+
+    /* Column 3 — dual frame */
+    .jevons-frames { display: flex; flex-direction: column; gap: 10px; }
+    .jevons-frame {
+      background: var(--surface2); border-radius: 8px;
+      padding: 10px 12px; border: 1px solid var(--border);
+      flex: 1;
+    }
+    .frame-title { font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+    .frame-title-e { color: var(--yellow); }
+    .frame-title-t { color: var(--blue); }
+    .frame-formula {
+      font-family: 'Courier New', monospace; font-size: 9px; color: var(--muted);
+      background: rgba(0,0,0,0.2); border-radius: 4px;
+      padding: 5px 7px; margin-bottom: 6px; line-height: 1.6;
+    }
+    .frame-result { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
+    .frame-result-e { color: var(--yellow); }
+    .frame-result-t { color: var(--blue); }
+    .frame-note { font-size: 9px; color: var(--muted); line-height: 1.45; margin-top: 4px; }
+    .frame-nrg-tag {
+      display: inline-block; font-size: 8px; font-weight: 800;
+      padding: 1px 5px; border-radius: 3px; margin-top: 4px;
+      background: rgba(168,117,245,0.14); color: var(--purple);
+      border: 1px solid rgba(168,117,245,0.25);
+    }
+    .frame-why-tag {
+      display: inline-block; font-size: 8px; font-weight: 700;
+      padding: 1px 5px; border-radius: 3px; margin-top: 4px;
+      background: rgba(78,158,255,0.1); color: var(--blue);
+      border: 1px solid rgba(78,158,255,0.2);
+    }
+
+    /* Trend chart row */
+    .jevons-chart-hdr {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .jevons-chart-wrap { height: 90px; position: relative; margin-bottom: 16px; }
+
+    /* Methodology strip */
+    .jevons-meth {
+      border-left: 2px solid rgba(232,162,42,0.35);
+      padding-left: 12px;
+    }
+    .jevons-meth-title {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .jevons-meth-formula {
+      font-family: 'Courier New', monospace; font-size: 10px; color: var(--yellow);
+      background: rgba(0,0,0,0.2); border-radius: 5px;
+      padding: 8px 10px; margin-bottom: 10px; line-height: 1.7;
+    }
+    .jevons-meth-inputs {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;
+    }
+    .meth-inp {
+      background: var(--surface2); border-radius: 7px;
+      padding: 7px 9px; border: 1px solid var(--border);
+    }
+    .meth-inp-lbl { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .meth-inp-val { font-size: 12px; font-weight: 700; margin: 2px 0; }
+    .meth-inp-src { font-size: 8px; color: var(--blue); }
+    .meth-inp-conf { font-size: 8px; color: var(--muted2); }
+    .jevons-caveat {
+      font-size: 9.5px; color: var(--muted); line-height: 1.55;
+      padding: 7px 9px;
+      background: rgba(232,162,42,0.04); border-radius: 5px;
+      border: 1px solid rgba(232,162,42,0.14);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .jevons-body { grid-template-columns: 190px 1fr; }
+      .jevons-frames { flex-direction: row; grid-column: 1 / -1; }
+      .jevons-frame { flex: 1; }
+      .jevons-meth-inputs { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 760px) {
+      .jevons-body { grid-template-columns: 1fr; }
+      .jevons-frames { flex-direction: column; }
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--border); padding: 14px 32px;
@@ -576,6 +788,121 @@
     </div>
 
   </div><!-- /scenario-grid -->
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  JEVONS REBOUND RATE — MASTER VARIABLE / SCENARIO ARBITER -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="jevons-panel">
+
+    <!-- Header -->
+    <div class="jevons-panel-hdr">
+      <div class="jevons-icon">⚖️</div>
+      <div class="jevons-hdr-text">
+        <div class="jevons-panel-title">Jevons Rebound Rate</div>
+        <div class="jevons-panel-sub">The single variable that determines which scenario wins — governs whether efficiency gains suppress or amplify AI energy demand</div>
+      </div>
+      <span class="jevons-arbiter-badge">Scenario Arbiter</span>
+      <span class="jevons-conf-badge">⚠ Medium confidence · Volume inferred</span>
+    </div>
+
+    <!-- 3-column body -->
+    <div class="jevons-body">
+
+      <!-- Col 1: Current metric -->
+      <div>
+        <div class="jevons-metric-val">~115%</div>
+        <div class="jevons-metric-lbl">Energy frame · Q1 2026 estimate</div>
+        <div class="jevons-metric-trend">↑ from ~105% (Q1 2025)</div>
+        <div class="jevons-metric-def">
+          For every <strong>1%</strong> improvement in AI hardware efficiency (TFLOPS/W), total AI inference energy demand grows by approximately <strong>1.15%</strong>.<br/><br/>
+          Efficiency gains are being <em>fully consumed</em> by increased adoption — and then some. The system is not saving energy from better hardware; it is using all of it, plus more.
+        </div>
+      </div>
+
+      <!-- Col 2: Gauge -->
+      <div>
+        <div class="jevons-gauge-lbl">Scenario Threshold Gauge — Energy Frame</div>
+        <div class="jevons-gauge">
+          <div class="gauge-seg gauge-seg-a"></div>
+          <div class="gauge-seg gauge-seg-b">
+            <div class="gauge-sweet-spot"></div>
+          </div>
+          <div class="gauge-seg gauge-seg-c"></div>
+          <!-- Needle at ~115%: (115/250) = 46% of bar -->
+          <div class="gauge-needle" style="left:46%;">
+            <div class="gauge-needle-label">~115% NOW</div>
+          </div>
+        </div>
+        <div class="gauge-zone-row">
+          <div class="gauge-zone-pill gauge-zone-pill-a">A · &lt;50%</div>
+          <div class="gauge-zone-pill gauge-zone-pill-b">B · 100–130% ← sweet spot</div>
+          <div class="gauge-zone-pill gauge-zone-pill-c">C · &gt;200%</div>
+        </div>
+        <div class="gauge-tick-row">
+          <span>0%</span><span>50%</span><span>100%</span><span>130%</span><span>200%</span><span>250%+</span>
+        </div>
+        <div class="gauge-callout">
+          <strong>Reading:</strong> At ~115%, the rebound is inside the Scenario B sweet spot (100–130%). Every efficiency gain is generating ~1.15× the equivalent new demand in energy terms — full Jevons rebound with slight upward pressure toward C. <strong>This is why B remains the base case at 70%.</strong> For the probability to shift, the rebound must move outside this band and stay there for 2+ quarters.
+        </div>
+      </div>
+
+      <!-- Col 3: Dual framing -->
+      <div class="jevons-frames">
+        <div class="jevons-frame">
+          <div class="frame-title frame-title-e">⚡ Energy Frame</div>
+          <div class="frame-formula">DC Energy Growth (YoY)<br/>─────────────────────<br/>Hardware Efficiency Gain (YoY)</div>
+          <div class="frame-result frame-result-e">~75–115%</div>
+          <div class="frame-note">DC energy: +25–30%/yr (EIA/LBNL). Hardware efficiency: +30–40%/yr (NVIDIA datasheets). Net: efficiency gains are nearly, but not fully, offset by demand growth.</div>
+          <div class="frame-nrg-tag">★ NRG-relevant frame</div>
+        </div>
+        <div class="jevons-frame">
+          <div class="frame-title frame-title-t">🔢 Token Frame</div>
+          <div class="frame-formula">Token Volume Growth (YoY)<br/>─────────────────────────<br/>Price-per-Token Decline (YoY)</div>
+          <div class="frame-result frame-result-t">~300%+</div>
+          <div class="frame-note">Token volume: ~9–10×/yr inferred (OpenAI revenue ÷ avg price). Price decline: ~3×/yr. Full Jevons backfire in compute terms — every price drop creates far more than proportional new usage.</div>
+          <div class="frame-why-tag">↑ Why C triggers are firing</div>
+        </div>
+      </div>
+
+    </div><!-- /jevons-body -->
+
+    <!-- 12-month trend chart -->
+    <div class="jevons-chart-hdr">12-Month Trend — Energy-Frame Rebound Rate (Estimated)</div>
+    <div class="jevons-chart-wrap">
+      <canvas id="jevonsChart"></canvas>
+    </div>
+
+    <!-- Methodology -->
+    <div class="jevons-meth">
+      <div class="jevons-meth-title">Calculation Methodology &amp; Data Provenance</div>
+      <div class="jevons-meth-formula">Rebound Rate (energy frame) = Δ% DC Energy Consumption ÷ Δ% Hardware Efficiency (TFLOPS/W)
+Rebound Rate (token frame)  = Δ% Token Volume ÷ Δ% Cost-per-Token (inverse price index)</div>
+      <div class="jevons-meth-inputs">
+        <div class="meth-inp">
+          <div class="meth-inp-lbl">DC Energy Growth</div>
+          <div class="meth-inp-val" style="color:var(--yellow);">+25–30%/yr</div>
+          <div class="meth-inp-src">EIA · LBNL annual reports</div>
+          <div class="meth-inp-conf">Confidence: High · Annual lag</div>
+        </div>
+        <div class="meth-inp">
+          <div class="meth-inp-lbl">Hardware Efficiency</div>
+          <div class="meth-inp-val" style="color:var(--purple);">+30–40%/yr</div>
+          <div class="meth-inp-src">NVIDIA datasheets (FP8 TFLOPS/W)</div>
+          <div class="meth-inp-conf">Confidence: High · Per-generation</div>
+        </div>
+        <div class="meth-inp">
+          <div class="meth-inp-lbl">Token Volume (proxy)</div>
+          <div class="meth-inp-val" style="color:var(--blue);">~9–10×/yr</div>
+          <div class="meth-inp-src">OpenAI revenue ÷ Artif. Analysis price</div>
+          <div class="meth-inp-conf">Confidence: Medium · ±30% range</div>
+        </div>
+      </div>
+      <div class="jevons-caveat">
+        <strong>Key uncertainty:</strong> Inference token volumes are not publicly disclosed by any major provider. The volume proxy (revenue ÷ average price/token) has ±30% uncertainty and conflates model mix, enterprise vs. consumer tiers, and non-inference revenue. The energy-frame calculation is more reliable because both DC energy data (EIA/LBNL) and hardware efficiency data (NVIDIA datasheets) are directly observable. Token-frame rebound (~300%) should be interpreted as directional, not precise. The two frames converge on the same qualitative conclusion: Jevons rebound is real, full, and slightly above 100% in energy terms — Scenario B territory.
+      </div>
+    </div>
+
+  </div><!-- /jevons-panel -->
 
   <!-- ═══════════════════════════════════════════════════ -->
   <!--  CATEGORY 1: TECHNOLOGY EFFICIENCY                -->
@@ -1355,6 +1682,62 @@
       }
     });
   }
+
+  // ── Jevons Rebound Rate — 12-month energy-frame trend ──
+  new Chart(document.getElementById('jevonsChart'), {
+    type: 'line',
+    data: {
+      labels: ['Mar 25','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan 26','Feb','Mar 26'],
+      datasets: [
+        { label: 'Energy-frame rebound rate',
+          data: [105, 108, 110, 112, 115, 118, 112, 116, 120, 117, 122, 126, 115],
+          borderColor: '#e8a22a', backgroundColor: 'rgba(232,162,42,0.08)',
+          fill: true, borderWidth: 2.5, tension: 0.4, pointRadius: 3,
+          pointBackgroundColor: '#e8a22a', z: 10 },
+        { label: 'B upper (130%)',
+          data: Array(13).fill(130),
+          borderColor: 'rgba(62,207,108,0.45)', borderDash: [5,4], borderWidth: 1.5,
+          backgroundColor: 'transparent', pointRadius: 0 },
+        { label: 'B lower (100%)',
+          data: Array(13).fill(100),
+          borderColor: 'rgba(62,207,108,0.45)', borderDash: [5,4], borderWidth: 1.5,
+          backgroundColor: 'rgba(62,207,108,0.04)', fill: '-1', pointRadius: 0 },
+        { label: 'A threshold (50%)',
+          data: Array(13).fill(50),
+          borderColor: 'rgba(78,158,255,0.35)', borderDash: [3,5], borderWidth: 1,
+          backgroundColor: 'transparent', pointRadius: 0 },
+        { label: 'C threshold (200%)',
+          data: Array(13).fill(200),
+          borderColor: 'rgba(240,82,82,0.35)', borderDash: [3,5], borderWidth: 1,
+          backgroundColor: 'transparent', pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true, position: 'right',
+          labels: { boxWidth: 8, padding: 10, font: { size: 9 },
+            filter: item => item.datasetIndex === 0
+          }
+        },
+        tooltip: {
+          mode: 'index', intersect: false,
+          callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y}%` }
+        },
+        annotation: {}
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
+        y: {
+          min: 0, max: 240,
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { callback: v => `${v}%`, maxTicksLimit: 7, font: { size: 9 } }
+        }
+      },
+      elements: { line: { borderWidth: 2 }, point: { radius: 2, hoverRadius: 4 } }
+    }
+  });
 
   // ── T1: GPU Perf/Watt ──
   bar('perfwattChart',
