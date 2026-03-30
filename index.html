@@ -200,11 +200,44 @@
     .sc-c .sc-demand-val { color: var(--scC); }
     .sc-demand-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
-    .trigger-count { display: flex; align-items: center; gap: 6px; font-size: 11px; }
-    .trigger-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .trigger-count { display: flex; align-items: center; gap: 6px; font-size: 11px; flex-wrap: wrap; }
+    .trigger-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .t-fire { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
     .t-cold { background: var(--muted2); }
     .trigger-label { color: var(--muted); font-size: 11px; }
+    .trigger-label-alert { color: var(--red); font-size: 11px; font-weight: 700; }
+
+    /* Threshold met alert box */
+    .thresh-met-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .thresh-met-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px;
+      background: rgba(240,82,82,0.2); color: var(--red);
+      border: 1px solid rgba(240,82,82,0.4); letter-spacing: 0.3px;
+      animation: pulseRed 2.5s infinite;
+    }
+    @keyframes pulseRed { 0%,100% { box-shadow: 0 0 0px rgba(240,82,82,0); } 50% { box-shadow: 0 0 8px rgba(240,82,82,0.5); } }
+    .trigger-alert-box {
+      background: rgba(240,82,82,0.07); border: 1px solid rgba(240,82,82,0.25);
+      border-radius: 8px; padding: 9px 12px; margin-top: 8px;
+      font-size: 10px; line-height: 1.55; color: var(--muted);
+    }
+    .trigger-alert-box strong { color: var(--red); font-weight: 700; }
+    .trigger-alert-box .ta-distinction {
+      margin-top: 6px; padding-top: 6px;
+      border-top: 1px solid rgba(240,82,82,0.2);
+      font-size: 9.5px; color: var(--muted2);
+    }
+    /* B-scenario C-tension note */
+    .b-tension-note {
+      background: rgba(232,162,42,0.07); border: 1px solid rgba(232,162,42,0.2);
+      border-radius: 7px; padding: 8px 11px; margin-top: 8px;
+      font-size: 10px; line-height: 1.5; color: var(--muted);
+    }
+    .b-tension-note strong { color: var(--yellow); font-weight: 700; }
 
     /* ═══ Section labels ═══ */
     .section-label {
@@ -467,14 +500,18 @@
       <div class="trigger-count">
         <span style="font-size:10px; color:var(--muted);">Confirmation range — watch for deviation</span>
       </div>
+      <div class="b-tension-note">
+        <strong>⚠ Active tension with Scenario C.</strong> Current indicator readings are tracking C-directional (4 of 7 C triggers met). B remains the 2030 base case because sustained 50%+ YoY GPU growth and 35%+ capex growth through 2027 is historically unprecedented at this scale. If these rates hold for 2 more years without deceleration, a probability shift toward C is warranted.
+      </div>
     </div>
 
     <!-- Scenario C -->
     <div class="sc-card sc-c">
       <div class="sc-badge-row">
         <span class="sc-label">Scenario C</span>
-        <span style="font-size:11px; color:var(--muted);">→ stable at 15% since Dec'25</span>
+        <span class="thresh-met-badge">⚠ Trigger Threshold Met</span>
       </div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:6px; margin-top:-4px;">→ stable at 15% since Dec '25</div>
       <div class="sc-name">"Jevons Dominates"</div>
       <div class="sc-thesis">Efficiency gains trigger explosive adoption. AI becomes ubiquitous. Rebound exceeds 200%. Demand exceeds all projections.</div>
       <div class="prob-row">
@@ -501,7 +538,13 @@
         <div class="trigger-dot t-cold"></div>
         <div class="trigger-dot t-cold"></div>
         <div class="trigger-dot t-cold"></div>
-        <span class="trigger-label">4 of 7 triggers firing (need 3+)</span>
+        <span class="trigger-label-alert">4 of 7 triggers firing — THRESHOLD MET (need 3+)</span>
+      </div>
+      <div class="trigger-alert-box">
+        <strong>Scenario C is actively emerging.</strong> GPU shipments (+68% YoY), hyperscaler capex (+36%), interconnection queue depth (226 GW ERCOT), and DC vacancy (1.4%) have all crossed Scenario C thresholds simultaneously.
+        <div class="ta-distinction">
+          <strong style="color:var(--muted);">Why is probability still 15%?</strong> Triggers firing <em>today</em> confirm current momentum is C-directional. The 2030 probability reflects whether this pace is <em>sustained for 4+ years</em> — which requires GPU shipment growth to hold above 50% YoY through 2027, capex to stay above 35%, and no regulatory or physical grid constraint to emerge. Scenario B (70%) remains the base case because historical precedent strongly favors deceleration as markets normalize after a supply shock.
+        </div>
       </div>
     </div>
 
