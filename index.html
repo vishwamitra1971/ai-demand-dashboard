@@ -564,7 +564,7 @@
       font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
       color: var(--muted); margin-bottom: 6px;
     }
-    .jevons-chart-wrap { height: 90px; position: relative; margin-bottom: 16px; }
+    .jevons-chart-wrap { height: 130px; position: relative; margin-bottom: 16px; }
 
     /* Methodology strip */
     .jevons-meth {
@@ -867,7 +867,7 @@
     </div><!-- /jevons-body -->
 
     <!-- 12-month trend chart -->
-    <div class="jevons-chart-hdr">12-Month Trend — Energy-Frame Rebound Rate (Estimated)</div>
+    <div class="jevons-chart-hdr">12-Month Trend — Energy-Frame Rebound Rate (Estimated) &nbsp;<span style="font-size:9px; color:var(--muted2); font-weight:400; text-transform:none; letter-spacing:0;">· axis 45–155% · C threshold (200%) off-axis · shaded band = Scenario B range (100–130%)</span></div>
     <div class="jevons-chart-wrap">
       <canvas id="jevonsChart"></canvas>
     </div>
@@ -1730,9 +1730,9 @@ Rebound Rate (token frame)  = Δ% Token Volume ÷ Δ% Cost-per-Token (inverse pr
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
         y: {
-          min: 0, max: 240,
+          min: 45, max: 155,
           grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: { callback: v => `${v}%`, maxTicksLimit: 7, font: { size: 9 } }
+          ticks: { callback: v => `${v}%`, stepSize: 10, font: { size: 9 } }
         }
       },
       elements: { line: { borderWidth: 2 }, point: { radius: 2, hoverRadius: 4 } }
